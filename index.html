@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Explore place-based industrial opportunities across England." />
+    <title>The PIONEER Atlas | ICON</title>
+    <link rel="icon" href="assets/icon-logo.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="PIONEER Atlas home">
+        <img src="assets/icon-logo.png" alt="Independent Commission on Neighbourhoods" />
+      </a>
+      <div class="product-name">
+        <strong>The PIONEER Atlas</strong>
+        <span>The Place-based Industrial Opportunities for Neighbourhood Employment and Economic Renewal (PIONEER) Atlas identifies opportunities for industrial growth across England and explores how they could support good employment for residents of the most disadvantaged neighbourhoods.</span>
+      </div>
+      <div class="prototype-label">Working prototype</div>
+    </header>
+
+    <main>
+      <section class="control-band" aria-label="Map controls">
+        <div class="control-group metric-control">
+          <span class="control-label">Map measure</span>
+          <div class="segmented" id="metric-controls" role="group" aria-label="Map measure">
+            <button type="button" data-metric="localDeprivation" class="active">Local deprivation</button>
+          </div>
+        </div>
+        <div class="control-group scenario-control">
+          <span class="control-label">Export scenario</span>
+          <div class="segmented" id="scenario-controls" role="group" aria-label="Export scenario">
+            <button type="button" data-scenario="existing_trajectory">Existing trajectory</button>
+            <button type="button" data-scenario="policy_acceleration" class="active">Policy acceleration</button>
+            <button type="button" data-scenario="transformational">Transformational</button>
+          </div>
+        </div>
+        <div class="search-wrap">
+          <label class="control-label" for="place-search">Find a TTWA</label>
+          <input id="place-search" type="search" autocomplete="off" placeholder="Search by place name" />
+          <div id="search-results" class="search-results" hidden></div>
+        </div>
+      </section>
+
+      <section class="national-strip" aria-label="National scenario summary">
+        <div class="national-intro">
+          <span id="national-scenario-label">Policy acceleration by 2030</span>
+          <strong>England portfolio</strong>
+        </div>
+        <div class="headline-stat">
+          <span>Estimated additional export potential</span>
+          <strong id="national-exports">-</strong>
+        </div>
+        <div class="headline-stat">
+          <span>Direct Employment Uplift</span>
+          <strong id="national-direct-jobs">-</strong>
+        </div>
+        <div class="headline-stat">
+          <span>Indirect Employment Uplift</span>
+          <strong id="national-supply-jobs">-</strong>
+        </div>
+        <div class="headline-stat total-stat">
+          <span>Total Jobs Supported</span>
+          <strong id="national-total-jobs">-</strong>
+        </div>
+      </section>
+
+      <section class="explorer">
+        <div class="map-panel">
+          <div class="section-heading">
+            <div>
+              <h1 id="map-title">Deprivation by Travel to Work Area (TTWA)</h1>
+              <p id="map-instruction" class="map-instruction">Click an area to explore local industrial opportunities</p>
+            </div>
+            <button type="button" id="reset-map" class="text-button">Reset selection</button>
+          </div>
+          <div class="map-stage">
+            <svg id="ttwa-map" viewBox="0 0 620 760" role="img" aria-labelledby="map-title"></svg>
+            <div id="map-tooltip" class="map-tooltip" hidden></div>
+          </div>
+          <div class="map-legend">
+            <span id="legend-low">Lower</span>
+            <div id="legend-swatches" class="legend-swatches" aria-hidden="true"></div>
+            <span id="legend-high">Higher</span>
+            <strong id="legend-range"></strong>
+          </div>
+          <p id="map-note" class="map-note">TTWAs approximate self-contained local labour markets. Select one to see deprivation by neighbourhood.</p>
+        </div>
+
+        <aside class="detail-panel" id="detail-panel" aria-live="polite">
+          <div id="national-overview" class="overview-content">
+            <div class="method-callout">
+              <strong>Our model</strong>
+              <p>ICON's Place-Based Industrial Model identifies industries that different local economies could realistically expand or develop, estimates the employment they could support, and maps the disadvantaged neighbourhoods within each local labour market that should be central to realising those opportunities.</p>
+            </div>
+          </div>
+
+          <div id="place-overview" hidden>
+            <div class="place-heading">
+              <div>
+                <span class="eyebrow">Travel to Work Area</span>
+                <h2 id="place-name"></h2>
+                <span id="place-code" class="place-code"></span>
+              </div>
+              <button type="button" id="close-place" class="close-button" aria-label="Close place overview">×</button>
+            </div>
+
+            <div class="place-metrics">
+              <div><span>Estimated local economy export potential</span><strong id="place-exports"></strong></div>
+              <div><span>Local Employment Uplift</span><strong id="place-jobs"></strong></div>
+              <div><span>Indirect Employment Uplift</span><strong id="place-supply-jobs"></strong></div>
+            </div>
+            <div class="portfolio-summary">
+              <div>
+                <strong id="place-option-count"></strong>
+                <span id="place-option-mix"></span>
+              </div>
+              <div class="rag-counts" aria-label="Options by jobs scale">
+                <span class="rag-counts-label">Jobs uplift potential</span>
+                <span><i class="rag-dot green"></i><b id="green-count">0</b> strong</span>
+                <span><i class="rag-dot amber"></i><b id="amber-count">0</b> moderate</span>
+                <span><i class="rag-dot red"></i><b id="red-count">0</b> weak</span>
+              </div>
+            </div>
+
+            <div class="opportunity-toolbar">
+              <h3>Opportunities for industrial renewal</h3>
+              <select id="option-filter" aria-label="Filter industry propositions">
+                <option value="all">All routes</option>
+                <option value="expansion">Expansion</option>
+                <option value="diversification">Diversification</option>
+              </select>
+            </div>
+            <div class="evidence-key" aria-label="Evidence rating key">
+              <span>Evidence:</span>
+              <span><i class="rag-square green"></i>stronger</span>
+              <span><i class="rag-square amber"></i>moderate</span>
+              <span><i class="rag-square red"></i>weaker</span>
+              <span><i class="rag-square grey"></i>not applicable</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="sic-column">SIC</th>
+                    <th>Industry</th>
+                    <th>Route</th>
+                    <th class="jobs-column">Local Employment Uplift</th>
+                    <th class="rag-column" title="Current comparative advantage based on employment RCA">Current Relative Comparative Advantage (RCA)</th>
+                    <th class="rag-column" title="How closely the sector relates to the TTWA's existing industrial specialisms">Local Industrial Relatedness with Sector</th>
+                    <th class="rag-column" title="Similarity between the local occupational mix and the sector's workforce">Existing Workforce Suitability</th>
+                    <th class="rag-column" title="Size of the national export opportunity linked to the sector">High Export Potential</th>
+                  </tr>
+                </thead>
+                <tbody id="opportunity-table"></tbody>
+              </table>
+            </div>
+
+            <div id="industry-detail" class="industry-detail" hidden>
+              <div class="industry-detail-heading">
+                <div>
+                  <span id="industry-type" class="industry-type"></span>
+                  <h3 id="industry-name"></h3>
+                  <span id="industry-code"></span>
+                </div>
+                <button type="button" id="close-industry" class="close-button" aria-label="Close industry detail">×</button>
+              </div>
+
+              <div class="rating-grid" id="rating-grid"></div>
+
+              <div class="evidence-grid core-evidence-grid">
+                <div><span>Current jobs in industry</span><strong id="industry-current-jobs"></strong></div>
+                <div><span>Employment RCA</span><strong id="industry-rca"></strong></div>
+                <div><span>Relatedness percentile</span><strong id="industry-relatedness"></strong></div>
+                <div><span>Workforce percentile</span><strong id="industry-workforce"></strong></div>
+              </div>
+
+              <div class="impact-grid">
+                <div><span>Estimated local economy export potential</span><strong id="industry-exports"></strong></div>
+                <div><span>Local Employment Uplift</span><strong id="industry-direct-jobs"></strong></div>
+                <div><span>Indirect Employment Uplift</span><strong id="industry-supply-jobs"></strong></div>
+              </div>
+
+              <div id="review-callout" class="review-callout" hidden>
+                <strong>Interpret with care</strong>
+                <p id="review-reasons"></p>
+              </div>
+
+              <div class="product-list-wrap">
+                <span class="control-label">Leading linked national products</span>
+                <ul id="product-list" class="product-list"></ul>
+              </div>
+              <div class="market-context">
+                <span class="control-label">Leading export markets</span>
+                <p id="market-list"></p>
+              </div>
+              <p class="caveat">Products are national markets linked to the SIC industry. They are not evidence that each named product is currently made in this TTWA.</p>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="definitions-section">
+        <div class="definitions-heading">
+          <span class="eyebrow">Guide to the model</span>
+          <h2>Definitions</h2>
+        </div>
+        <div class="definition-band">
+          <div>
+            <strong>Expansion</strong>
+            <p>Growth in an industry with a qualifying existing local employment base.</p>
+          </div>
+          <div>
+            <strong>Diversification</strong>
+            <p>Development of an industry that is currently absent locally but is supported by related industries and workforce evidence.</p>
+          </div>
+          <div>
+            <strong>Current Relative Comparative Advantage (RCA)</strong>
+            <p>Shows whether an industry accounts for a larger share of local employment than it does nationally. An RCA above 1 means the TTWA is relatively specialised in that industry.</p>
+          </div>
+          <div>
+            <strong>Industrial relatedness</strong>
+            <p>Shows whether industries commonly found alongside this industry are already strong in the local economy.</p>
+          </div>
+          <div>
+            <strong>Workforce suitability</strong>
+            <p>Shows how closely the occupations held by local workers match the occupations normally used by the industry.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>The Place-based Industrial Opportunities for Neighbourhood Employment and Economic Renewal (PIONEER) Atlas identifies opportunities for industrial growth across England and explores how they could support good employment for residents of the most disadvantaged neighbourhoods.</span>
+    </footer>
+    <script src="app.js" defer></script>
+  </body>
+</html>
