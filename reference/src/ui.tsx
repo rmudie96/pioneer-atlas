@@ -141,6 +141,22 @@ export function ScenarioSelect({
     </div>
   );
 }
+export function RagBadge({ value, label }: { value: string; label?: string }) {
+  const colour = value.split("_")[0];
+  const tone = ["green", "amber", "red"].includes(colour) ? colour : "grey";
+  return (
+    <span
+      className={`rag-badge rag-${tone}`}
+      title={`${label ? `${label}: ` : ""}${rating(value)} (${tone})`}
+    >
+      <i aria-hidden="true" />
+      <span>
+        {label && `${label}: `}
+        {rating(value)}
+      </span>
+    </span>
+  );
+}
 export function EvidenceTrack({
   label,
   value,
@@ -154,7 +170,7 @@ export function EvidenceTrack({
     <div className="evidence-track">
       <div className="track-heading">
         <h3>{label}</h3>
-        <span>{rating(status)}</span>
+        <RagBadge value={status} />
       </div>
       <div className="track-value">
         {ordinal(value)} <span>percentile</span>

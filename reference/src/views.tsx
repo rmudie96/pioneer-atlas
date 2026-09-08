@@ -15,6 +15,7 @@ import type { Dataset, Option, Place, Route, Scenario } from "./model";
 import {
   Button,
   EvidenceTrack,
+  RagBadge,
   Icon,
   Metric,
   ScenarioSelect,
@@ -234,7 +235,7 @@ export function PlaceView({
           Industrial opportunities
         </SectionHeading>
         <p className="section-intro">
-          Ordered by lower policy-acceleration direct FTE. Rank stays fixed when
+          Ordered by lower policy-acceleration direct FTE. Rank and RAG ratings stay fixed when
           the scenario changes.
         </p>
         <div className="opportunity-list">
@@ -254,6 +255,16 @@ export function PlaceView({
                     count(n, 5),
                   )}{" "}
                   direct FTE
+                </span>
+                <span className="opportunity-ratings">
+                  <RagBadge value={o.jobsRating} label="Jobs scale" />
+                  <RagBadge
+                    value={o.ratings.comparativeAdvantage}
+                    label="Current base"
+                  />
+                  <RagBadge value={o.ratings.relatedness} label="Relatedness" />
+                  <RagBadge value={o.ratings.workforce} label="Workforce" />
+                  <RagBadge value={o.ratings.export} label="Exports" />
                 </span>
                 {o.reviewRequired && (
                   <span className="review-tag">
@@ -296,6 +307,11 @@ export function PlaceView({
           Separate stored ratings; these stay fixed when the scenario changes.
           Showing the current route filter.
         </p>
+        <p className="small-note">
+          Jobs-scale RAG uses lower policy-acceleration direct FTE: green ≥100,
+          amber 25–under 100, red under 25. The four evidence ratings measure
+          separate strengths; this is not an overall confidence score.
+        </p>
         <div
           className="evidence-table-scroll"
           tabIndex={0}
@@ -329,6 +345,7 @@ export function PlaceView({
                     {range(o.scenarios[route.scenario].directFte, (n) =>
                       count(n, 5),
                     )}
+                    <RagBadge value={o.jobsRating} label="Jobs scale" />
                   </td>
                   {[
                     o.ratings.comparativeAdvantage,
@@ -336,7 +353,9 @@ export function PlaceView({
                     o.ratings.workforce,
                     o.ratings.export,
                   ].map((r, i) => (
-                    <td key={i}>{rating(r)}</td>
+                    <td key={i}>
+                      <RagBadge value={r} />
+                    </td>
                   ))}
                 </tr>
               ))}
@@ -504,7 +523,10 @@ export function IndustryView({
                 : "The industry has recorded local employment, but its share of employment is below the national share."}
           </p>
           <p className="small-note">
-            Current-base evidence: {rating(option.ratings.comparativeAdvantage)}
+            <RagBadge
+              label="Current-base evidence"
+              value={option.ratings.comparativeAdvantage}
+            />
             . The employment RCA compares the local industry share with the
             national share.
           </p>
@@ -528,7 +550,7 @@ export function IndustryView({
           </p>
           <div className="export-evidence">
             <span>National export opportunity evidence</span>
-            <strong>{rating(option.ratings.export)}</strong>
+            <RagBadge value={option.ratings.export} />
           </div>
           <SectionHeading number="03">
             What the scenario could support

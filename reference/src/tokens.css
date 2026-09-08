@@ -97,3 +97,10 @@
   --imd-9: #68a994;
   --imd-10: #277665;
 }
+
+:root {
+  --rag-green: #17823b;
+  --rag-amber: #d58b00;
+  --rag-red: #c43b31;
+  --rag-grey: #8796a1;
+}
