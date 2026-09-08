@@ -259,3 +259,12 @@ test("Neighbourhood routes preserve place and scenario, but cannot be used witho
   assert.deepEqual(readRoute(routeSearch(r)), r);
   assert.ok(validateRoute(readRoute("?lens=neighbourhoods"), dataset));
 });
+
+test("Place links default to local deprivation while explicit national context survives sharing", () => {
+ assert.equal(readRoute("?place=E30000261").lens, "neighbourhoods");
+ assert.equal(readRoute("").lens, "opportunities");
+ for (const lens of ["opportunities", "need", "neighbourhoods"]) {
+  const route=readRoute(`?place=E30000261&lens=${lens}`);
+  assert.deepEqual(readRoute(routeSearch(route)), route);
+ }
+});

@@ -89,7 +89,7 @@ export function readRoute(search: string): Route {
   const p = new URLSearchParams(search);
   const s = p.get("scenario") ?? "policy_acceleration";
   const section = p.get("section") ?? "why";
-  const lens = p.get("lens") ?? "opportunities";
+  const lens = p.get("lens") ?? (p.get("place") ? "neighbourhoods" : "opportunities");
   return {
     place: p.get("place"),
     industry: p.get("industry"),
@@ -116,7 +116,7 @@ export function routeSearch(route: Route): string {
     p.set("scenario", route.scenario);
   if (route.industry && route.section !== "why")
     p.set("section", route.section);
-  if (route.lens !== "opportunities") p.set("lens", route.lens);
+  if (route.place || route.lens !== "opportunities") p.set("lens", route.lens);
   return p.size ? `?${p}` : "";
 }
 export function validateRoute(route: Route, data: Dataset): string | undefined {

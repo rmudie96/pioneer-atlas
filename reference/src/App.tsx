@@ -46,6 +46,7 @@ export function App() {
   }, []);
   function link(update: Partial<Route>) {
     const next = { ...route, ...update, error: undefined };
+    if (update.place && update.lens === undefined) next.lens = "neighbourhoods";
     if (update.place === null) {
       next.industry = null;
       next.section = "why";
@@ -55,6 +56,7 @@ export function App() {
   }
   function go(update: Partial<Route>) {
     const next = { ...route, ...update, error: undefined };
+    if (update.place && update.lens === undefined) next.lens = "neighbourhoods";
     if (update.place === null) {
       next.industry = null;
       next.section = "why";
@@ -291,9 +293,10 @@ export function App() {
               data={data}
               selected={route.place}
               lens={route.lens}
-              onSelect={(code) =>
-                go({ place: code, industry: null, section: "why" })
-              }
+              onSelect={(code) => {
+                go({ place: code, industry: null, section: "why" });
+                setMapOnMobile(true);
+              }}
               onLens={(lens) => go({ lens })}
               reading={!!option}
             />
