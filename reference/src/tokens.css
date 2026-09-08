@@ -1,0 +1,99 @@
+:root {
+  --page: #f4f3ec;
+  --surface: #fcfcf8;
+  --surface-raised: #fff;
+  --text: #162c36;
+  --text-secondary: #58666b;
+  --text-muted: #58666b;
+  --line: #ced5d2;
+  --boundary: #879d99;
+  --control-border: #73837f;
+  --accent: #244bc4;
+  --selected: var(--accent);
+  --focus: var(--accent);
+  --hover: #e6ebf9;
+  --data: #086c60;
+  --positive: var(--data);
+  --review: #a34728;
+  --negative: var(--review);
+  --moderate: #886016;
+  --neutral: var(--text-secondary);
+  --map-land: #e6ece4;
+  --map-ground: var(--page);
+  --map-label-halo: var(--page);
+  --map-need-1: #edf6f4;
+  --map-need-2: #c8e6df;
+  --map-need-3: #85c9bc;
+  --map-need-4: #2a9b8c;
+  --map-need-5: #006c62;
+  --chart-series: var(--data);
+  --chart-track: #dce5df;
+  --review-surface: #f5eee6;
+  --font: "IBM Plex Sans", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+  --type-display: clamp(44px, 3.7vw, 64px);
+  --type-title: clamp(32px, 2.5vw, 40px);
+  --type-heading: 22px;
+  --type-body: 17px;
+  --type-label: 14px;
+  --type-annotation: 12px;
+  --type-number: clamp(36px, 3vw, 48px);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --gutter: 40px;
+  --header-height: 80px;
+  --rail-height: 48px;
+  --control-radius: 2px;
+  --duration-feedback: 120ms;
+  --duration-content: 180ms;
+  --duration-map: 320ms;
+  --ease-standard: cubic-bezier(0.2, 0.7, 0.2, 1);
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--page);
+  font-synthesis: none;
+}
+@media (max-width: 1279px) {
+  :root {
+    --gutter: 24px;
+    --type-display: 44px;
+    --type-number: 36px;
+  }
+}
+@media (max-width: 767px) {
+  :root {
+    --gutter: 16px;
+    --header-height: 68px;
+    --rail-height: 48px;
+    --type-display: 36px;
+    --type-title: 28px;
+    --type-number: 34px;
+    --type-body: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-feedback: 0ms;
+    --duration-content: 0ms;
+    --duration-map: 0ms;
+  }
+}
+
+:root {
+  --imd-1: #7f1d1d;
+  --imd-2: #b33a2f;
+  --imd-3: #d96d49;
+  --imd-4: #e9a06d;
+  --imd-5: #f0c99d;
+  --imd-6: #e7e4d4;
+  --imd-7: #cbdccf;
+  --imd-8: #9fc6b7;
+  --imd-9: #68a994;
+  --imd-10: #277665;
+}

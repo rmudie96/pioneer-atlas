@@ -1,11 +1,41 @@
-# The PIONEER Atlas prototype
+# PIONEER Atlas
 
-This static prototype presents the final-model place layer through an interactive England TTWA map. It covers all 149 English TTWAs and the leading 2,643 expansion and diversification propositions selected for display.
+The public economic atlas covers 149 English Travel to Work Areas and 2,643 published leading industrial propositions. It presents the existing research in the Common Ground design: map exploration, place profiles, industry evidence, three conditional scenarios, national products/markets and local neighbourhood deprivation.
 
-The interface reports three export scenarios, ranges for direct TTWA jobs and UK supply-chain jobs, separate evidence ratings, and linked national product and market context. Current comparative advantage is based on employment RCA. Selecting a TTWA replaces the national map with its 2021 LSOAs, shaded by English Index of Multiple Deprivation 2025 decile. The prototype does not yet assign industry jobs to neighbourhood residents. GVA is not included.
+## Development and release
 
-Run `python -m http.server 8765` from this directory and open `http://127.0.0.1:8765/`.
+The React/TypeScript source is in `reference/` (the original Sheffield reference was extended in place). Use Node 24 and pnpm:
 
-Web data are rebuilt by running `python src/prepare_pioneer_atlas_web_data_v1.py` and `python src/prepare_pioneer_atlas_neighbourhood_maps_v1.py` from the project root. The source tables are `Data/processed/pioneer_atlas_ttwa_headline_v1.csv` and `Data/processed/pioneer_atlas_ttwa_industry_propositions_v1.csv`.
+```sh
+cd reference
+pnpm install --frozen-lockfile
+pnpm run dev
+```
 
-The TTWA geometry is the ONS Travel to Work Areas (December 2011) generalised clipped boundary dataset. The prototype has no data-download function and no server-side database.
+For a release:
+
+```sh
+pnpm run stage:release
+```
+
+This builds and tests the app, verifies every copied research asset against its original, and stages the static HTML/assets at the repository root. It does **not** commit or push. Review the changes, commit and push `main`; GitHub Pages publishes the root of that branch. Do not publish the raw React source or run the upstream research pipeline as part of a frontend release.
+
+The root `app.js` and `styles.css` are retained prototype files and are no longer loaded by the new `index.html`. Git history preserves the original working site at `f77e59d` for rollback. Hashed production assets are committed because this repository uses branch-based Pages publishing.
+
+## Research contract
+
+Original files under `data/` remain unchanged. `data/manifest.json` is generated provenance metadata containing SHA-256 hashes, not a new model output. All place headlines and national totals cover the complete 5,889-candidate portfolio. Lists expose up to 20 published propositions per place and explicitly state that scope. Ranks, weights, estimates, scenario assumptions, geographic assignments, review flags and classification thresholds are unchanged.
+
+The atlas reports conditional gross direct TTWA FTE and separately identified UK-wide supply-chain FTE; these are not forecasts, net new jobs or allocations to neighbourhood residents. Products and destination names are national evidence, not proof of local manufacture. The local map retains 2021 LSOAs and IMD 2025 national deciles.
+
+## Links and exports
+
+Query URLs refresh correctly on GitHub Pages without rewrites:
+
+```text
+https://rmudie96.github.io/pioneer-atlas/?place=E30000275&industry=2910&scenario=transformational&section=markets
+```
+
+Supported state: `place`, `industry`, `scenario`, `section` and `lens`. Use `lens=neighbourhoods` with a place for local IMD geography. Search, temporary route filters, map camera and mobile Map/Profile preference are transient interface state. Downloads retain exact records and all scenarios, with an explicit scope statement and source hashes.
+
+See `FULL_ATLAS_RELEASE.md` for rollout checks and remaining limitations.
