@@ -14,6 +14,13 @@ const places = JSON.parse(await readFile(new URL(files[0], sourceDir), "utf8"));
 const options = JSON.parse(
   await readFile(new URL(files[3], sourceDir), "utf8"),
 );
+const extension = JSON.parse(await readFile(new URL("../public/context/exploration-extension.json", import.meta.url), "utf8"));
+if (extension.version !== "exploration-2026-10-14" || extension.additionalDiversification.length !== 1195 || extension.further.length !== 1490)
+  throw new Error("Exploration extension is missing or does not match this release.");
+for (const p of places) {
+  if (extension.further.filter(o => o.ttwaCode === p.code).length !== 10)
+    throw new Error(`Exploration coverage incomplete: ${p.code}`);
+}
 if (places.length !== 149 || options.length !== 2643)
   throw new Error(
     "Research release membership changed; review before publishing.",

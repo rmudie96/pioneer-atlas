@@ -3,16 +3,13 @@ import type {
   Neighbourhood,
   NeighbourhoodMapData,
   Place,
-  Route,
 } from "./model";
 import { Button, Icon } from "./ui";
 
 export function NeighbourhoodMap({
   place,
-  onLens,
 }: {
   place: Place;
-  onLens: (lens: Route["lens"]) => void;
 }) {
   const [data, setData] = useState<NeighbourhoodMapData | null>(null);
   const [error, setError] = useState(false);
@@ -51,6 +48,13 @@ export function NeighbourhoodMap({
       return [x + (w - nw) / 2, y + (h - nh) / 2, nw, nh];
     });
   }
+  function focusNeighbourhood(n: Neighbourhood, path: SVGPathElement) {
+    setSelected(n);
+    const b = path.getBBox();
+    const w = Math.min(620, Math.max(100, b.width * 3, b.height * 3 * 620 / 760));
+    const h = w * 760 / 620;
+    setView([b.x + b.width / 2 - w / 2, b.y + b.height / 2 - h / 2, w, h]);
+  }
   return (
     <section
       className="atlas-map neighbourhood-map"
@@ -61,19 +65,9 @@ export function NeighbourhoodMap({
           <span className="eyebrow">LOCAL CONTEXT / 2021 LSOA</span>
           <h2>{place.name}</h2>
         </div>
-        <label className="lens-control">
-          <span className="sr-only">Map layer</span>
-          <select
-            aria-label="Map layer"
-            value="neighbourhoods"
-            onChange={(e) => onLens(e.target.value as Route["lens"])}
-          >
-            <option value="opportunities">Opportunities</option>
-            <option value="need">Neighbourhood need</option>
-            <option value="neighbourhoods">Local IMD deciles</option>
-          </select>
-        </label>
+        <span className="map-layer-title">Local Deprivation (IMD)</span>
       </div>
+      <p className="map-instruction">Select a neighbourhood to zoom in. Use arrow keys to move between neighbourhoods and Enter to select.</p>
       <div className="map-stage">
         {!data ? (
           <div className="map-load" role="status">
@@ -90,9 +84,6 @@ export function NeighbourhoodMap({
                 Try again
               </Button>
             )}
-            <Button onClick={() => onLens("need")}>
-              Return to TTWA context
-            </Button>
           </div>
         ) : (
           <>
@@ -139,19 +130,25 @@ export function NeighbourhoodMap({
                   d={n.path}
                   className={`lsoa imd-${n.imdDecile}`}
                   role="button"
-                  tabIndex={0}
+                  tabIndex={selected ? (selected.code === n.code ? 0 : -1) : (data.neighbourhoods[0].code === n.code ? 0 : -1)}
                   aria-label={`${n.name}: IMD decile ${n.imdDecile} of 10`}
                   onPointerEnter={() => {
                     if (!drag.current) setSelected(n);
                   }}
                   onFocus={() => setSelected(n)}
-                  onClick={() => {
-                    if (!drag.current?.moved) setSelected(n);
+                  onClick={(e) => {
+                    if (!drag.current?.moved) focusNeighbourhood(n, e.currentTarget);
                   }}
                   onKeyDown={(e) => {
+                    if (["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"].includes(e.key)) {
+                      e.preventDefault();
+                      const paths = Array.from(svg.current!.querySelectorAll<SVGPathElement>(".lsoa"));
+                      const i = paths.indexOf(e.currentTarget);
+                      paths[(i + (e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 1) + paths.length) % paths.length].focus();
+                    }
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      setSelected(n);
+                      focusNeighbourhood(n, e.currentTarget);
                     }
                   }}
                 />

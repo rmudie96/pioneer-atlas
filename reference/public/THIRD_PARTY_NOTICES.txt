@@ -268,3 +268,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+=== Geographic search additions (2026-10) ===
+Council and constituency search: Office for National Statistics Open Geography Portal.
+Contains public sector information licensed under the Open Government Licence v3.0.
+https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+Postcode lookups: Postcodes.io, based on ONS geographic data.
+Settlement names and representative coordinates: OS Open Names via Postcodes.io.
+Contains OS data © Crown copyright and database right 2026.
+https://osdatahub.os.uk/downloads/open/OpenNames
+The context/provenance.json file identifies the specific ONS lookups and source hashes.

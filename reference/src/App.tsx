@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { AtlasMap } from "./AtlasMap";
 import { NeighbourhoodMap } from "./NeighbourhoodMap";
 import { fetchDataset, readRoute, routeSearch, validateRoute } from "./model";
 import type { Dataset, Route } from "./model";
@@ -10,21 +9,31 @@ import {
   StateMessage,
   PlaceSearchDialog,
 } from "./ui";
-import { AtlasLink, HomeView, IndustryView, PlaceView } from "./views";
+import { AtlasLink, IndustryView, PlaceView, PlaceBanner } from "./views";
+import {
+  CompareView,
+  IndustryExplore,
+  PlaceCoverage,
+  NationalOutlook,
+} from "./ExploreViews";
+import { AreaView } from "./AreaViews";
+import { exportSelection, industryName } from "./exploration";
+import employmentBase from "../public/context/employment-base.json";
+import { LandingPage } from "./LandingPage";
 
 export function App() {
   const [route, setRoute] = useState<Route>(() =>
     readRoute(window.location.search),
   );
-  const [data, setData] = useState<Dataset | null>(null);
-  const [error, setError] = useState("");
-  const [attempt, setAttempt] = useState(0);
-  const [method, setMethod] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [mapOnMobile, setMapOnMobile] = useState(!route.place);
-  const [shareText, setShareText] = useState("");
-  const reading = useRef<HTMLElement>(null);
-  const first = useRef(true);
+  const [data, setData] = useState<Dataset | null>(null),
+    [error, setError] = useState(""),
+    [attempt, setAttempt] = useState(0);
+  const [method, setMethod] = useState(false),
+    [searchOpen, setSearchOpen] = useState(false),
+    [shareText, setShareText] = useState("");
+  const [contextExpanded, setContextExpanded] = useState(false);
+  const reading = useRef<HTMLElement>(null),
+    first = useRef(true);
   useEffect(() => {
     const controller = new AbortController();
     setError("");
@@ -36,54 +45,91 @@ export function App() {
     return () => controller.abort();
   }, [attempt]);
   useEffect(() => {
-    const pop = () => {
-      const next = readRoute(window.location.search);
-      setRoute(next);
-      setMapOnMobile(!next.place);
-    };
+    const pop = () => setRoute(readRoute(window.location.search));
     window.addEventListener("popstate", pop);
     return () => window.removeEventListener("popstate", pop);
   }, []);
-  function link(update: Partial<Route>) {
+  function nextRoute(update: Partial<Route>): Route {
     const next = { ...route, ...update, error: undefined };
-    if (update.place && update.lens === undefined) next.lens = "neighbourhoods";
+    if (update.view && update.view !== "explore") {
+      if (next.filter === "exploration") next.filter = "all";
+      next.area = null;
+      next.place = null;
+      next.industry = null;
+      next.lens = "need";
+    }
+    if (update.place) {
+      next.area = null;
+      next.view = "explore";
+      if (update.lens === undefined) next.lens = "neighbourhoods";
+      if (update.place !== route.place) {
+        next.filter = update.filter ?? "all";
+        next.sort = "jobs";
+        next.query = "";
+        next.sector = null;
+      }
+    }
     if (update.place === null) {
       next.industry = null;
       next.section = "why";
       if (next.lens === "neighbourhoods") next.lens = "need";
     }
-    return `./${routeSearch(next)}`;
+    if (update.view === "explore" && update.place === null) {
+      if (!update.area) next.area = null;
+      next.sector = null;
+      next.filter = "all";
+      next.query = "";
+      next.sort = "jobs";
+    }
+    if (update.area) {
+      next.view = "explore";
+      next.place = null;
+      next.industry = null;
+      next.lens = "need";
+      next.sector = null;
+      next.filter = "all";
+      next.query = "";
+      next.sort = "jobs";
+    }
+    return next;
+  }
+  function link(update: Partial<Route>) {
+    return `./${routeSearch(nextRoute(update))}`;
   }
   function go(update: Partial<Route>) {
-    const next = { ...route, ...update, error: undefined };
-    if (update.place && update.lens === undefined) next.lens = "neighbourhoods";
-    if (update.place === null) {
-      next.industry = null;
-      next.section = "why";
-      if (next.lens === "neighbourhoods") next.lens = "need";
-    }
-    window.history.pushState({}, "", link(next));
+    const next = nextRoute(update);
+    if (Object.keys(update).length === 1 && update.query !== undefined)
+      window.history.replaceState({}, "", `./${routeSearch(next)}`);
+    else window.history.pushState({}, "", `./${routeSearch(next)}`);
     setRoute(next);
     setShareText("");
-    if (update.place !== undefined || update.industry !== undefined)
-      setMapOnMobile(!next.place);
+    if (update.place !== undefined) setContextExpanded(false);
   }
+  const place = data?.places.find((p) => p.code === route.place);
+  const option = data?.options.find(
+    (o) => o.ttwaCode === route.place && o.sic4 === route.industry,
+  );
   useEffect(() => {
+    document.title = `${option ? `${industryName(option.industry)} · ` : ""}${place?.name ?? route.area?.name ?? (route.view === "compare" ? "Compare local economies" : route.view === "industries" ? "Explore industries" : "England’s industrial possibilities")} — PIONEER Atlas`;
     if (!data) return;
-    const place = data.places.find((p) => p.code === route.place);
-    const option = data.options.find(
-      (o) => o.sic4 === route.industry && o.ttwaCode === route.place,
-    );
-    document.title = `${option && route.industry ? `${option.industry} · ` : ""}${place?.name ?? "England’s industrial possibilities"} — PIONEER Atlas`;
     if (first.current) {
       first.current = false;
       return;
     }
+    window.scrollTo({ top: 0 });
     reading.current?.scrollTo({ top: 0 });
-    reading.current
-      ?.querySelector<HTMLElement>("h1")
-      ?.focus({ preventScroll: true });
-  }, [route.place, route.industry, route.section, data]);
+      (reading.current?.querySelector<HTMLElement>("h1") ??
+        document.querySelector<HTMLElement>(".place-banner h1"))
+        ?.focus({ preventScroll: true });
+  }, [
+    route.place,
+    route.industry,
+    route.section,
+    route.view,
+    route.sector,
+    route.area,
+    data,
+  ]);
   async function copyLink() {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -94,26 +140,18 @@ export function App() {
   }
   function exportData() {
     if (!data) return;
-    const place = data.places.find((p) => p.code === route.place);
-    const options = data.options.filter(
-      (o) =>
-        o.ttwaCode === route.place &&
-        (!route.industry || o.sic4 === route.industry),
-    );
+    const selected = exportSelection(data, route);
     const payload = {
-      metadata: {
-        source: data.manifest,
-        url: window.location.href,
-        scenario: route.scenario,
-        exportedAt: new Date().toISOString(),
-        scope: route.industry
-          ? "One stored place-industry proposition; national product/market context"
-          : "Complete place summary; published leading propositions, not necessarily the complete candidate portfolio",
-        interpretation:
-          "Conditional gross direct TTWA FTE; associated indirect FTE is UK-wide. Not net new jobs, forecasts or evidence of local product manufacture.",
+      ...selected,
+      employmentScale: {
+        ...employmentBase,
+        totals: Object.fromEntries(
+          selected.places.map((p) => [
+            p.code,
+            (employmentBase.totals as Record<string, number>)[p.code],
+          ]),
+        ),
       },
-      place,
-      propositions: options,
     };
     const url = URL.createObjectURL(
       new Blob([JSON.stringify(payload, null, 2)], {
@@ -122,15 +160,13 @@ export function App() {
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = `pioneer-${route.place}-${route.industry ?? "place"}-${route.scenario}.json`;
+    a.download = `pioneer-${route.place ?? route.view ?? "england"}-${route.industry ?? route.sector ?? "portfolio"}-${route.scenario}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
-  const place = data?.places.find((p) => p.code === route.place);
-  const option = data?.options.find(
-    (o) => o.sic4 === route.industry && o.ttwaCode === route.place,
-  );
   const routeError = data ? validateRoute(route, data) : undefined;
+  const view = route.view ?? "explore",
+    home = !place && !route.area && view === "explore";
   return (
     <>
       <a href="#reading" className="skip-link">
@@ -139,10 +175,8 @@ export function App() {
       <header className="site-header">
         <AtlasLink
           className="brand"
-          href={link({ place: null, industry: null, lens: "opportunities" })}
-          onClick={() =>
-            go({ place: null, industry: null, lens: "opportunities" })
-          }
+          href={link({ view: "explore", place: null, lens: "need" })}
+          onClick={() => go({ view: "explore", place: null, lens: "need" })}
         >
           <strong>
             PIONEER<span className="brand-stop">.</span>
@@ -154,34 +188,58 @@ export function App() {
           </span>
         </AtlasLink>
         <nav aria-label="Main navigation">
-          <AtlasLink
-            className={!route.place ? "nav-current" : ""}
-            href={link({ place: null, industry: null })}
-            onClick={() => go({ place: null, industry: null })}
+          {(["explore", "industries", "compare"] as const).map((v, i) => (
+            <AtlasLink
+              key={v}
+              className={view === v ? "nav-current" : ""}
+              href={link({
+                view: v,
+                place: null,
+                sector: null,
+                query: "",
+                filter: "all",
+                sort: "jobs",
+              })}
+              onClick={() =>
+                go({
+                  view: v,
+                  place: null,
+                  sector: null,
+                  query: "",
+                  filter: "all",
+                  sort: "jobs",
+                })
+              }
+            >
+              {["Explore", "Industries", "Compare"][i]}
+            </AtlasLink>
+          ))}
+          <button onClick={() => setMethod(true)}>The model</button>
+          <button
+            className="header-search"
+            aria-label="Find your area"
+            onClick={() => setSearchOpen(true)}
           >
-            Explore
-          </AtlasLink>
-          <button onClick={() => setMethod(true)}>
-            The model <Icon name="info" size={16} />
+            <Icon name="search" size={18} />
+            <span>Find your area</span>
           </button>
-          {data && (
-            <button onClick={() => setSearchOpen(true)}>
-              Find a place <Icon name="search" size={16} />
-            </button>
-          )}
         </nav>
       </header>
-      <div className="location-rail">
+      {data && !routeError && !home && !place && !route.area && (
+        <NationalOutlook data={data} route={route} go={go} />
+      )}
+      {data && place && !option && !routeError && <PlaceBanner place={place} data={data} route={route} go={go} link={link} />}
+      {!home && <div className="location-rail">
         <nav aria-label="Breadcrumb">
           <AtlasLink
-            href={link({ place: null, industry: null })}
-            onClick={() => go({ place: null, industry: null })}
+            href={link({ view: "explore", place: null })}
+            onClick={() => go({ view: "explore", place: null })}
           >
             England
           </AtlasLink>
           {place && (
             <>
-              <span aria-hidden="true">/</span>
+              <span>/</span>
               <AtlasLink
                 href={link({ industry: null, section: "why" })}
                 onClick={() => go({ industry: null, section: "why" })}
@@ -192,41 +250,42 @@ export function App() {
           )}
           {option && (
             <>
-              <span aria-hidden="true">/</span>
+              <span>/</span>
               <span className="code">SIC {option.sic4}</span>
+            </>
+          )}
+          {route.area && (
+            <>
+              <span>/</span>
+              <span>{route.area.name}</span>
+            </>
+          )}
+          {!place && view !== "explore" && (
+            <>
+              <span>/</span>
+              <span>
+                {view === "compare" ? "Compare places" : "Explore industries"}
+              </span>
             </>
           )}
         </nav>
         <div className="rail-actions">
-          {place && (
-            <>
-              <Button
-                className="mobile-switch"
-                onClick={() => setMapOnMobile((v) => !v)}
-              >
-                <Icon name="map" size={16} />
-                {mapOnMobile ? "Profile" : "Map"}
-              </Button>
-              <Button
-                onClick={copyLink}
-                aria-label="Copy link to this analytical state"
-              >
-                Share <Icon name="external" size={16} />
-              </Button>
-              {place && (
-                <Button
-                  onClick={exportData}
-                  aria-label="Download current research data"
-                >
-                  <Icon name="download" size={16} />
-                  <span className="export-label">Data</span>
-                </Button>
-              )}
-            </>
-          )}
-          {!place && <span className="edition">PIONEER / ENGLAND</span>}
+          <Button
+            onClick={copyLink}
+            aria-label="Copy link to this analytical state"
+          >
+            Share <Icon name="external" size={16} />
+          </Button>
+          <Button
+            onClick={exportData}
+            disabled={!data || !!routeError}
+            aria-label="Download current research data"
+          >
+            <Icon name="download" size={16} />
+            <span className="export-label">Data</span>
+          </Button>
         </div>
-      </div>
+      </div>}
       {shareText && (
         <div className="share-status" role="status">
           {shareText}
@@ -246,14 +305,14 @@ export function App() {
           >
             <p>
               {error ||
-                "Preparing England’s geography and existing industrial evidence."}
+                "Preparing England’s geography and industrial evidence."}
             </p>
             {error && (
               <Button
                 className="button-primary"
                 onClick={() => setAttempt((a) => a + 1)}
               >
-                Try again <Icon name="arrow" />
+                Try again
               </Button>
             )}
           </StateMessage>
@@ -266,40 +325,52 @@ export function App() {
               className="button-primary"
               onClick={() =>
                 go({
+                  view: "explore",
                   place: null,
                   industry: null,
+                  sector: null,
+                  compare: [],
+                  filter: "all",
+                  sort: "jobs",
+                  query: "",
                   scenario: "policy_acceleration",
                   section: "why",
-                  lens: "opportunities",
+                  lens: "need",
                 })
               }
             >
-              Return to England <Icon name="arrow" />
+              Return to England
             </Button>
           </StateMessage>
         </main>
+      ) : home ? (
+        <LandingPage data={data} route={route} go={go} link={link}
+          method={() => setMethod(true)} reading={reading} download={exportData} />
       ) : (
         <main
-          className={`workspace ${option ? "workspace-dossier" : ""} ${place ? "has-place" : "is-home"} ${mapOnMobile ? "mobile-map" : "mobile-reading"}`}
+          className={`workspace ${place && !option ? "has-place" : "wide-page"} ${option ? "workspace-dossier" : ""} ${contextExpanded ? "context-expanded" : ""}`}
         >
-          {route.lens === "neighbourhoods" && place ? (
-            <NeighbourhoodMap
-              key={place.code}
-              place={place}
-              onLens={(lens) => go({ lens })}
-            />
-          ) : (
-            <AtlasMap
-              data={data}
-              selected={route.place}
-              lens={route.lens}
-              onSelect={(code) => {
-                go({ place: code, industry: null, section: "why" });
-                setMapOnMobile(true);
-              }}
-              onLens={(lens) => go({ lens })}
-              reading={!!option}
-            />
+          {place && !option && (
+            <aside className="place-context">
+              <div className="context-title">
+                <span className="eyebrow">
+                  THE PLACE BEHIND THE OPPORTUNITIES
+                </span>
+                <h2>Neighbourhood context</h2>
+                <PlaceCoverage code={place.code} />
+                <p>
+                  Deprivation map of {place.name}. ICON recommends that local policymakers prioritise routes into work from areas that have high levels of deprivation, into new industrial opportunities.
+                </p>
+                <Button
+                  className="button-outline"
+                  onClick={() => setContextExpanded((v) => !v)}
+                >
+                  {contextExpanded ? "Compact map" : "Enlarge map"}
+                  <Icon name="map" size={16} />
+                </Button>
+              </div>
+              <NeighbourhoodMap key={place.code} place={place} />
+            </aside>
           )}
           <section
             className="reading-panel"
@@ -311,10 +382,22 @@ export function App() {
                 ? `${option.industry} evidence`
                 : place
                   ? `${place.name} economic profile`
-                  : "Explore England"
+                  : route.area
+                    ? `${route.area.name} connected local economies`
+                    : view === "compare"
+                      ? "Compare places"
+                      : view === "industries"
+                        ? "Explore industries"
+                        : "Explore England"
             }
           >
-            {option ? (
+            {view === "compare" ? (
+              <CompareView data={data} route={route} go={go} link={link} />
+            ) : view === "industries" ? (
+              <IndustryExplore data={data} route={route} go={go} link={link} />
+            ) : route.area ? (
+              <AreaView data={data} route={route} go={go} link={link} />
+            ) : option ? (
               <IndustryView
                 option={option}
                 placeName={place!.name}
@@ -333,9 +416,7 @@ export function App() {
                 link={link}
                 method={() => setMethod(true)}
               />
-            ) : (
-              <HomeView data={data} go={go} route={route} />
-            )}
+            ) : null}
             <footer className="reading-footer">
               <span>Independent Commission on Neighbourhoods</span>
               <button onClick={() => setMethod(true)}>
@@ -343,6 +424,7 @@ export function App() {
               </button>
             </footer>
           </section>
+
         </main>
       )}
       <MethodDialog open={method} onClose={() => setMethod(false)} />
@@ -352,7 +434,16 @@ export function App() {
           onClose={() => setSearchOpen(false)}
           onSelect={(code) => {
             setSearchOpen(false);
-            go({ place: code, industry: null, section: "why" });
+            go({
+              view: "explore",
+              place: code,
+              industry: null,
+              section: "why",
+            });
+          }}
+          onArea={(area) => {
+            setSearchOpen(false);
+            go({ area });
           }}
         />
       )}

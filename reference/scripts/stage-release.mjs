@@ -4,6 +4,7 @@ import {
   readdir,
   mkdir,
   copyFile,
+  cp,
 } from "node:fs/promises";
 import { createHash } from "node:crypto";
 const root = new URL("../../", import.meta.url);
@@ -25,8 +26,14 @@ for (const file of await readdir(new URL("assets/", dist)))
     new URL(`assets/${file}`, dist),
     new URL(`assets/${file}`, root),
   );
+await cp(new URL("context/", dist), new URL("context/", root), {
+  recursive: true,
+});
 await copyFile(new URL("index.html", dist), new URL("index.html", root));
-await copyFile(new URL("THIRD_PARTY_NOTICES.txt", dist), new URL("THIRD_PARTY_NOTICES.txt", root));
+await copyFile(
+  new URL("THIRD_PARTY_NOTICES.txt", dist),
+  new URL("THIRD_PARTY_NOTICES.txt", root),
+);
 await writeFile(
   new URL("data/manifest.json", root),
   JSON.stringify(manifest, null, 2),

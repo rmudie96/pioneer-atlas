@@ -1,0 +1,111 @@
+.atlas-front { max-width: 1680px; margin: 0 auto; }
+.front-jump { display: none; }
+.front-intro { padding: 30px var(--gutter) 28px; display: grid; grid-template-columns: minmax(0, 2.4fr) minmax(220px, 1fr); gap: 40px; align-items: end; border-bottom: 1px solid var(--line); }
+.front-intro h1 { font-size: clamp(44px, 4.8vw, 78px); line-height: 1.04; font-weight: 400; letter-spacing: -.05em; margin: 0 0 14px; text-wrap: initial; }
+.front-intro h1 > span { color: var(--data); font-weight: 600; }
+.front-credit { font-size: clamp(19px, 1.6vw, 25px); line-height: 1.4; color: var(--data); text-wrap: balance; }
+.front-credit strong { font-weight: 500; color: inherit; }
+.front-purpose { max-width: 350px; font-size: 18px; line-height: 1.6; padding-bottom: 2px; }
+.front-explore { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); grid-template-areas: "map search" "map outlook"; align-items: start; }
+.front-search { grid-area: search; padding: 24px 40px 16px; background: var(--surface); }
+.front-search h2 { font-size: 28px; margin: 6px 0 14px; }
+.front-search .geo-search { margin: 0; }
+.front-search .geo-search > label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.front-directory { margin-top: 6px; font-size: 16px; }
+.front-directory summary, .front-interpretation summary { cursor: pointer; min-height: 44px; padding: 10px 0; font-weight: 500; }
+.front-directory ul { list-style: none; padding: 0; max-height: 300px; overflow: auto; border-top: 1px solid var(--line); }
+.front-directory a { display: flex; align-items: center; justify-content: space-between; min-height: 44px; border-bottom: 1px solid var(--line); padding: 8px; }
+.front-directory a:hover { background: var(--hover); }
+.front-map { grid-area: map; min-width: 0; align-self: stretch; border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+.front-map-invite { display: flex; align-items: center; gap: 10px; padding: 24px 30px 0; color: var(--text); }
+.front-map-invite p { font-size: 23px; line-height: 1.35; font-weight: 500; max-width: 540px; }
+.front-map-invite svg { width: 26px; height: 26px; color: var(--data); }
+.front-map .atlas-map { padding: 20px 30px; flex: 1; overflow: visible; min-height: 760px; }
+.front-map .map-head { gap: 12px; }
+.map-layer-title { font-size: 17px; font-weight: 500; color: var(--data); }
+.front-map .map-head h2 { display: none; }
+.front-map .map-stage { height: 550px; min-height: 430px; margin: 14px 0; }
+.front-map .geography { padding: 0 12px; }
+.front-map .map-bottom { padding: 8px 0 0; }
+.front-map .map-tooltip { max-width: min(340px, 100%); z-index: 4; }
+.front-map .map-layers { width: fit-content; }
+.front-outlook { grid-area: outlook; padding: 22px 40px 24px; background: var(--surface); border-top: 1px solid var(--line); }
+.front-section-label { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.front-outlook h2 { font-size: 28px; margin: 10px 0; }
+.front-outlook > p { font-size: 15px; line-height: 1.6; }
+.front-scenarios { border: 0; margin: 16px 0 0; padding: 0; min-width: 0; }
+.front-scenarios legend { font-size: 16px; padding: 0 0 10px; color: var(--text); }
+.front-scenarios > div { display: grid; grid-template-columns: 1fr; border: 1px solid var(--control-border); }
+.front-scenarios button { display: flex; flex-direction: row; gap: 14px; align-items: center; text-align: left; padding: 12px; font-size: 16px; line-height: 1.3; min-height: 56px; }
+.front-scenarios button + button { border-top: 1px solid var(--control-border); }
+.front-scenarios button[aria-pressed="true"] { background: var(--text); color: white; }
+.front-scenarios button:hover:not([aria-pressed="true"]) { background: var(--hover); }
+.front-scenario-index { font-family: var(--font-mono); font-size: 12px; }
+.front-scenario-description { font-size: 15px; line-height: 1.5; color: var(--text-secondary); margin: 14px 0 20px; min-height: 45px; }
+.front-prize strong { display: block; font-size: clamp(38px, 4vw, 62px); letter-spacing: -.055em; line-height: 1.1; font-weight: 500; color: var(--data); font-variant-numeric: tabular-nums; }
+.front-prize > span { display: block; font-size: 16px; margin-top: 8px; }
+.front-range { margin: 20px 0 24px; }
+.front-range-track { height: 13px; background: var(--chart-track); position: relative; }
+.front-range-track i, .front-range-track b { position: absolute; height: 100%; transition: width 400ms ease, left 400ms ease; }
+.front-range-track i { left: 0; background: var(--data); }
+.front-range-track b { background: repeating-linear-gradient(135deg, var(--data) 0 2px, #c1d9d0 2px 5px); }
+.front-range-axis { display: flex; justify-content: space-between; gap: 12px; font-family: var(--font-mono); font-size: 12px; margin-top: 8px; color: var(--text-secondary); }
+.front-jobs { display: flex; flex-direction: column; gap: 5px; }
+.front-jobs strong { font-size: clamp(28px, 2.6vw, 39px); font-weight: 400; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.front-jobs span { font-size: 16px; }
+.front-outlook .front-caveat { font-size: 14px; line-height: 1.5; color: var(--text-secondary); margin-top: 20px; }
+.front-interpretation { font-size: 16px; margin-top: 6px; }
+.front-interpretation p { font-size: 15px; line-height: 1.6; margin-top: 10px; }
+.front-interpretation .button { padding-left: 0; font-size: 15px; }
+.front-reading { border-top: 1px solid var(--line); padding: 45px var(--gutter); display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; }
+.front-reading h2 { font-size: 28px; margin: 12px 0; }
+.front-reading p { font-size: 16px; color: var(--text-secondary); line-height: 1.65; }
+.front-reading-item { border-left: 1px solid var(--line); padding-left: 25px; }
+.front-reading h3 { font-size: 20px; line-height: 1.25; margin: 12px 0; }
+.front-footer { padding: 18px var(--gutter); border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 20px; font-size: 15px; color: var(--text-secondary); }
+.front-footer > div { display: flex; gap: 20px; }
+.front-footer .button { font-size: 15px; padding: 8px 0; }
+@media (max-width: 1100px) {
+  .front-intro { grid-template-columns: 1fr; gap: 0; padding-top: 30px; }
+  .front-purpose { max-width: 650px; margin-top: 20px; font-size: 16px; }
+  .front-intro h1 { font-size: 58px; }
+  .front-search, .front-outlook { padding-left: 24px; padding-right: 24px; }
+  .front-explore { grid-template-columns: 1fr 1fr; }
+  .front-map .atlas-map { padding-left: 20px; padding-right: 20px; }
+  .front-map-invite { padding-left: 20px; padding-right: 20px; }
+  .front-prize strong { font-size: 42px; }
+  .front-reading { grid-template-columns: repeat(3, 1fr); }
+  .front-reading-intro { grid-column: 1/-1; max-width: 650px; }
+}
+@media (max-width: 760px) {
+  .front-jump { display: flex; flex-wrap: wrap; gap: 0 20px; margin-top: 10px; color: var(--data); font-size: 15px; }
+  .front-jump a { display: inline-flex; align-items: center; min-height: 44px; }
+  .front-intro { padding: 26px 20px; }
+  .front-intro h1 { font-size: clamp(37px, 7.8vw, 55px); line-height: 1.07; margin: 12px 0 16px; }
+  .front-title-break { display: none; }
+  .front-credit { font-size: 19px; line-height: 1.4; text-wrap: initial; }
+  .front-credit strong { display: block; }
+  .front-purpose { font-size: 15px; margin-top: 16px; }
+  .front-explore { grid-template-columns: 1fr; grid-template-areas: "search" "map" "outlook"; }
+  .front-search, .front-outlook { padding: 24px 20px; }
+  .front-search h2, .front-outlook h2 { font-size: 26px; }
+  .front-map { border-right: 0; border-top: 1px solid var(--line); }
+  .front-map .atlas-map { display: flex; min-height: 0; padding: 18px 20px; }
+  .front-map .map-stage { height: 430px; min-height: 430px; flex: none; }
+  .front-map .map-head .eyebrow { display: block; font-size: 9px; }
+  .front-map .map-layers { width: 100%; }
+  .front-map .map-layers button { font-size: 14px; padding: 10px 8px; }
+  .front-map-invite p { font-size: 20px; }
+  .front-scenarios > div { grid-template-columns: 1fr; }
+  .front-scenarios button { font-size: 16px; padding: 12px; flex-direction: row; align-items: center; gap: 14px; min-height: 56px; }
+  .front-scenarios button + button { border-left: 0; border-top: 1px solid var(--control-border); }
+  .front-prize strong { font-size: clamp(40px, 10vw, 60px); }
+  .front-jobs strong { font-size: 32px; }
+  .front-scenario-description { min-height: 0; }
+  .front-reading { padding: 30px 20px; grid-template-columns: 1fr; gap: 24px; }
+  .front-reading-item { padding: 20px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+  .front-reading-item h3 { margin: 8px 0; }
+  .front-footer { align-items: start; flex-direction: column; gap: 4px; padding: 20px; }
+  .front-footer > div { flex-wrap: wrap; gap: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .front-range-track i, .front-range-track b { transition: none; } }

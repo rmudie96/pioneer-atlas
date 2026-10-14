@@ -1,0 +1,29 @@
+.estimate-note { margin: 20px 0; padding: 20px 22px; border-left: 3px solid var(--data); background: #eef2ec; }
+.estimate-note p { font-size: 15px; line-height: 1.6; }
+.estimate-note p + p { margin-top: 12px; }
+.further-industries { margin: 40px 0 24px; padding-top: 28px; border-top: 2px solid var(--data); }
+.further-industries h2 { font-size: 30px; margin: 10px 0 16px; }
+.further-industries > p { font-size: 16px; }
+.further-boundary { padding: 18px; border: 1px solid var(--line); margin: 16px 0; }
+.further-boundary strong { display: block; margin-bottom: 6px; }
+.exploration-method { margin: 16px 0 24px; }
+.exploration-method summary { min-height: 44px; cursor: pointer; color: var(--data); font-size: 16px; padding: 10px 0; }
+.exploration-method p { font-size: 15px; }
+.further-option { border-top: 1px solid var(--line); }
+.further-option:last-child { border-bottom: 1px solid var(--line); }
+.further-option > summary { padding: 22px 0; cursor: pointer; list-style: none; }
+.further-option > summary::-webkit-details-marker { display: none; }
+.further-option > summary:hover { color: var(--data); }
+.further-option summary strong { display: block; font-size: 20px; font-weight: 500; }
+.further-option summary small { display: block; margin-top: 8px; font-size: 14px; color: var(--text-secondary); }
+.further-open { font-size: 14px; white-space: nowrap; color: var(--data); }
+.further-open::after { content: " +"; }
+.further-option[open] .further-open::after { content: " −"; }
+.further-evidence { padding-bottom: 24px; }
+.further-evidence h3 { font-size: 17px; margin: 24px 0 10px; }
+.further-evidence p, .further-evidence li { font-size: 15px; line-height: 1.65; }
+.further-evidence .with-headings { margin-top: 0; }
+.front-scenarios > div { grid-template-columns: 1fr; }
+.front-scenarios button { flex-direction: row; align-items: center; min-height: 56px; gap: 14px; }
+.front-scenarios button + button { border-left: 0; border-top: 1px solid var(--control-border); }
+@media(max-width:640px) { .estimate-note { padding: 16px; } }

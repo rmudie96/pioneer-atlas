@@ -1,0 +1,270 @@
+/* October review: readable labels, a larger local map and visible market evidence. */
+.front-intro { grid-template-columns: minmax(0, 1.8fr) minmax(300px, 1fr); align-items: center; }
+.front-purpose { max-width: 560px; font-family: var(--font-sans); font-size: clamp(24px, 2.05vw, 34px); line-height: 1.25; letter-spacing: -.025em; font-weight: 400; }
+.front-purpose > span { display: block; color: var(--data); margin-bottom: 12px; font-weight: 600; }
+.front-section-label .eyebrow { font-size: 16px; color: var(--text); }
+.front-results .front-scenario-description { font-size: 19px; line-height: 1.5; color: var(--text); }
+.front-prize > span { font-size: 19px; line-height: 1.4; }
+.support-intro { font-size: 21px; margin: 24px 0 14px; color: var(--text); }
+.employment-breakdown { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; }
+.front-jobs strong { font-size: clamp(25px, 2.3vw, 38px); }
+.front-jobs span { font-size: 17px; line-height: 1.4; }
+.front-reading { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.front-reading-intro { grid-column: 1 / -1; max-width: 1100px; }
+.front-reading p { font-size: 18px; line-height: 1.55; }
+.front-reading-item:first-of-type { border-left: 0; }
+.national-outlook { grid-template-columns: minmax(280px,1.3fr) repeat(3,minmax(0,1fr)); }
+.national-outlook-number > span { font-size: 16px; line-height: 1.4; color: var(--text); }
+.national-outlook-number > strong { font-size: clamp(24px,2.3vw,38px); }
+.national-scenario-guide { grid-column: 1 / -1; }
+.workspace.has-place, .workspace.has-place.context-expanded { grid-template-columns: minmax(380px, 30%) minmax(0,1fr); }
+.workspace.has-place > .place-context { grid-column: 1; grid-row: 1; border-left: 0; border-right: 1px solid var(--line); }
+.workspace.has-place > .reading-panel { grid-column: 2; grid-row: 1; padding: 30px; min-width: 0; }
+.place-context .context-title p { font-size: 17px; color: var(--text); line-height: 1.5; }
+.place-context .context-title h2 { font-size: 28px; }
+.place-context .atlas-map { height: 760px; padding: 20px; }
+.place-context .map-stage { min-height: 380px; flex: 1; }
+.place-context .map-head { flex-wrap: wrap; }
+.place-context .map-head h2 { font-size: 24px; }
+.place-context .map-head .eyebrow { font-size: 13px; }
+.map-instruction { font-size: 14px; line-height: 1.4; margin: 10px 0; }
+.place-context .neighbourhood-legend p { font-size: 14px; line-height: 1.5; }
+.context-expanded .place-context .atlas-map { height: 950px; }
+.route-summary { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; border-block: 1px solid var(--line); padding: 20px 0; margin: 24px 0; }
+.route-summary > span { font-size: 19px; color: var(--text); line-height: 1.4; }
+.route-summary strong { display: block; font-size: 44px; font-weight: 500; color: var(--data); }
+.place-outlook .metric-label, .dossier-opening .metric-label, .headline-metrics .metric-label { font-size: 18px; color: var(--text); line-height: 1.4; }
+.place-outlook .metric-value { font-size: clamp(30px,3vw,46px); }
+.place-outlook .metric-primary .metric-value { font-size: clamp(40px,4vw,62px); }
+.scenario-comparison > summary, .dossier-opening .scenario-comparison > summary { font-size: 19px; color: var(--text); padding: 16px 0; }
+.scenario-strip { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
+.scenario-strip button { padding: 20px 14px; text-align: left; min-width: 0; }
+.scenario-strip button > span { font-size: 17px; line-height: 1.4; }
+.scenario-amount { margin-top: 22px; }
+.scenario-amount > strong { display: block; font-size: 25px; line-height: 1.25; color: var(--data); }
+.scenario-amount > span { display: block; margin-top: 7px; font-size: 16px; line-height: 1.4; }
+.scenario-strip button.selected .scenario-amount > strong { color: inherit; }
+.evidence-key-top > strong { font-size: 25px; line-height: 1.3; font-weight: 500; max-width: 750px; }
+.evidence-key-top > span { font-size: 16px; flex-wrap: wrap; row-gap: 12px; }
+.evidence-key i { width: 11px; height: 11px; }
+.signal-definitions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.signal-definitions p, .evidence-key details, .evidence-key details p { font-size: 16px; line-height: 1.5; }
+.evidence-key summary { font-size: 18px; }
+.opportunity-grid-heading { grid-template-columns: minmax(0,1fr) 360px; font-size: 15px; color: var(--text); font-weight: 500; padding-right: 30px; }
+.opportunity-row { grid-template-columns: minmax(0,1fr) 360px 18px; gap: 12px; }
+.opportunity-body { grid-column: auto; }
+.opportunity-body strong { font-size: 23px; }
+.opportunity-why, .opportunity-meta { font-size: 16px; line-height: 1.5; }
+.opportunity-row .evidence-signals { grid-column: auto; }
+.evidence-signal strong { font-size: 16px; }
+.evidence-signal small { font-size: 13px; }
+.with-headings .signal-label { font-size: 16px; min-height: 44px; color: var(--text); }
+.with-headings .evidence-signal strong { font-size: 23px; }
+.with-headings .evidence-signal small { font-size: 16px; }
+.further-entry { width: 100%; display: flex; gap: 16px; align-items: center; justify-content: space-between; padding: 20px; margin: 12px 0 24px; border: 2px solid var(--data); color: var(--data); background: var(--surface-raised); font-size: 20px; text-align: left; }
+.further-entry strong { font-size: 16px; font-weight: 400; }
+.further-entry[aria-pressed="true"] { background: var(--data); color: white; }
+.further-industries { margin-top: 0; }
+.industry-lead .eyebrow { font-size: 18px; color: var(--text); line-height: 1.45; }
+.dossier-introduction .industry-definition { font-size: 19px; line-height: 1.5; }
+.dossier-market-preview { margin-top: 26px; border-top: 2px solid var(--data); padding-top: 20px; }
+.dossier-market-preview h2 { font-size: 26px; line-height: 1.25; margin-bottom: 16px; }
+.dossier-market-preview li, .dossier-market-preview p, .dossier-market-preview a { font-size: 18px; line-height: 1.5; }
+.dossier-market-preview ul { padding-left: 20px; }
+.dossier-market-preview li + li { margin-top: 8px; }
+.dossier-market-preview .small-note { font-size: 14px; margin-top: 14px; }
+.front-scenarios button { font-size: 18px; }
+.dossier-markets { border-block: 2px solid var(--data); margin: 32px 0; padding: 28px 0; display: grid; grid-template-columns: minmax(0,1.25fr) minmax(0,1fr); column-gap: 40px; }
+.dossier-markets > h2 { grid-column: 1 / -1; font-size: 34px; margin: 0 0 20px; }
+.dossier-markets .national-context, .dossier-markets .evidence-chain, .dossier-markets > .scope-note, .dossier-markets > .review-note, .dossier-markets > .inline-link { grid-column: 1 / -1; }
+.dossier-markets .national-context { margin: 0 0 20px; }
+.dossier-markets .national-context p { font-size: 18px; }
+.dossier-markets .national-context .eyebrow { font-size: 15px; color: var(--text); }
+.dossier-markets .evidence-chain { display: none; }
+.dossier-markets .section-heading { grid-column: 1; grid-row: 3; }
+.dossier-markets .product-list { grid-column: 1; grid-row: 4; }
+.dossier-markets .product-list + .section-heading { grid-column: 2; grid-row: 3; }
+.dossier-markets .market-list { grid-column: 2; grid-row: 4; display: block; }
+.dossier-markets .section-heading h2 { font-size: 25px; }
+.dossier-markets .product-list li, .dossier-markets .market-list > div { font-size: 20px; line-height: 1.45; padding: 18px 0; }
+.dossier-markets .product-list .code { font-size: 15px; }
+.dossier-markets .scope-note { font-size: 16px; }
+.dossier-markets .market-number { font-size: 16px; }
+@media (max-width:1250px) and (min-width:901px) {
+  .opportunity-grid-heading { display: none; }
+  .opportunity-row { grid-template-columns: minmax(0,1fr) 20px; }
+  .opportunity-row .evidence-signals { grid-column: 1 / -1; grid-row: 2; }
+  .opportunity-row > svg { grid-column: 2; grid-row: 1; }
+  .opportunity-row .signal-label { position: static; width: auto; height: auto; clip-path: none; overflow: visible; font-size: 14px; color: var(--text); min-height: 42px; }
+  .scenario-strip { grid-template-columns: 1fr; }
+}
+@media (max-width:900px) {
+  .front-intro { grid-template-columns: 1fr; gap: 24px; }
+  .front-purpose { max-width: none; font-size: 27px; }
+  .national-outlook { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .national-outlook-heading { grid-column: 1 / -1; }
+  .workspace.has-place, .workspace.has-place.context-expanded { display: flex; flex-direction: column; }
+  .workspace.has-place > .place-context { width: 100%; position: static; display: block; border-right: 0; border-bottom: 1px solid var(--line); }
+  .workspace.has-place > .reading-panel { width: 100%; padding: 24px; }
+  .place-context .atlas-map { height: 680px; }
+  .context-title { padding: 24px; }
+  .opportunity-grid-heading { display: none; }
+  .opportunity-row { grid-template-columns: minmax(0,1fr) 20px; }
+  .opportunity-row .evidence-signals { grid-column: 1 / -1; grid-row: 2; }
+  .opportunity-row > svg { grid-column: 2; grid-row: 1; }
+  .opportunity-row .signal-label { position: static; width: auto; height: auto; clip-path: none; overflow: visible; font-size: 14px; color: var(--text); min-height: 42px; }
+  .dossier-markets { display: block; }
+}
+@media (max-width:640px) {
+  .front-intro { padding: 26px 20px; }
+  .front-purpose { font-size: 25px; }
+  .front-section-label .eyebrow { font-size: 14px; }
+  .employment-breakdown, .headline-metrics.employment-breakdown { grid-template-columns: 1fr; gap: 22px; }
+  .front-jobs strong { font-size: 36px; }
+  .front-reading { display: block; }
+  .front-reading-item { margin-top: 24px; }
+  .national-outlook { grid-template-columns: 1fr; }
+  .national-outlook-number { grid-column: 1; padding-bottom: 10px; }
+  .national-outlook-number > strong { font-size: 32px; }
+  .place-context .atlas-map { height: 680px; padding: 20px; }
+  .place-context .map-stage { min-height: 320px; }
+  .route-summary { gap: 16px; }
+  .route-summary > span { font-size: 17px; }
+  .route-summary strong { font-size: 38px; }
+  .scenario-strip { display: block; }
+  .scenario-strip button { width: 100%; }
+  .evidence-key-top > strong { font-size: 24px; }
+  .signal-definitions { grid-template-columns: 1fr; }
+  .evidence-key-top > span { font-size: 15px; gap: 6px; }
+  .evidence-key i { margin-left: 0; }
+  .further-entry { flex-wrap: wrap; padding: 16px; gap: 10px; }
+  .further-entry > span { width: 100%; }
+  .with-headings { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .opportunity-row .evidence-signals { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .with-headings .signal-label { font-size: 16px; }
+  .dossier-markets h2 { font-size: 28px; }
+  .dossier-markets .product-list li, .dossier-markets .market-list > div { font-size: 18px; }
+}
+@media print { .workspace.has-place { display: block; } .place-context { position: static; } }
+
+/* Follow-up review: compact hierarchy and one focused set of local figures. */
+.front-intro h1 { font-size: clamp(38px,4.2vw,64px); }
+.front-purpose { font-size: clamp(21px,1.8vw,27px); line-height: 1.35; }
+.front-credit { font-size: clamp(18px,1.45vw,22px); }
+.front-prize strong { font-size: clamp(36px,3.4vw,48px); }
+.front-jobs strong { font-size: clamp(24px,2vw,31px); }
+.front-scenarios button { font-size: 16px; }
+.front-results .front-scenario-description, .front-prize > span { font-size: 17px; }
+.workspace.has-place > .place-context { position: static; }
+.context-title h2, .place-context .context-title h2 { font-size: 24px; }
+.place-context .context-title p { font-size: 16px; }
+.evidence-key-top > strong { font-size: 21px; line-height: 1.4; }
+.evidence-key { margin-top: 0; }
+.opportunity-body strong, .industry-column-title { font-size: 20px; font-weight: 500; letter-spacing: -.018em; line-height: 1.3; }
+.industry-column-title small { display: block; font-size: 14px; font-weight: 400; line-height: 1.4; margin-top: 6px; }
+.opportunity-grid-heading { align-items: center; }
+.place-banner { padding: 24px var(--gutter); display: grid; grid-template-columns: minmax(190px,.7fr) minmax(0,2fr); grid-template-areas: "name outlook" "counts outlook"; gap: 16px 40px; background: var(--map-ground); border-bottom: 1px solid var(--line); }
+.place-banner .place-title { grid-area: name; display: block; margin: 0; }
+.place-banner .place-title h1 { font-size: clamp(32px,3.2vw,46px); margin: 10px 0 16px; overflow-wrap: anywhere; }
+.place-banner .place-title .eyebrow { font-size: 12px; }
+.place-banner .place-title .button { margin: 0; font-size: 14px; padding: 10px 14px; }
+.place-banner .route-summary { grid-area: counts; margin: 0; border: 0; padding: 0; gap: 18px; align-self: start; }
+.place-banner .route-summary > span { font-size: 15px; }
+.place-banner .route-summary strong { font-size: 29px; }
+.place-banner .place-outlook { grid-area: outlook; margin: 0; padding: 0; border: 0; display: grid; grid-template-columns: minmax(0,.85fr) minmax(0,1.65fr); gap: 12px 24px; align-items: start; }
+.place-banner .scenario-field { grid-column: 1 / -1; margin: 0; }
+.place-banner .place-outlook > .metric { grid-column: 1; grid-row: 2; margin: 0; padding-top: 28px; }
+.place-banner .support-intro { grid-column: 2; grid-row: 2; margin: 0; font-size: 16px; }
+.place-banner .headline-metrics { grid-column: 2; grid-row: 2; margin: 0; padding-top: 28px; gap: 18px; }
+.place-banner .place-outlook .metric-value, .place-banner .place-outlook .metric-primary .metric-value { font-size: clamp(23px,2.15vw,32px); line-height: 1.2; }
+.place-banner .place-outlook .metric-label { font-size: 15px; }
+.place-banner .scenario-comparison { grid-column: 1 / -1; margin: 0; }
+.place-banner .scenario-comparison > summary { font-size: 16px; padding: 12px 0 0; }
+.portfolio-controls > .segmented { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); width: 100%; }
+.portfolio-controls > .segmented button { min-width: 0; padding: 12px 8px; font-size: 15px; line-height: 1.35; }
+.portfolio-controls > .segmented:not(:has(button:nth-child(4))) { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.dossier-introduction h1 { font-size: clamp(30px,3.4vw,46px); line-height: 1.15; margin: 12px 0; }
+.dossier-introduction .industry-definition { font-size: 17px; max-width: 950px; }
+.industry-view > .evidence-key { margin: 24px 0 12px; }
+.industry-view > .with-headings { margin-top: 12px; }
+.with-headings .evidence-signal strong { font-size: 20px; }
+.with-headings .signal-label { font-size: 15px; }
+.dossier-data { display: grid; grid-template-columns: minmax(260px,.75fr) minmax(0,1.25fr); gap: 32px; margin-top: 28px; align-items: start; }
+.dossier-data .industry-lead { margin: 0; padding: 20px 0; border-top: 2px solid var(--data); border-bottom: 0; display: block; }
+.dossier-data .industry-lead .eyebrow { font-size: 16px; }
+.dossier-data .headline-metrics { grid-template-columns: 1fr; }
+.dossier-data .metric-value, .dossier-data .metric-primary .metric-value { font-size: 32px; }
+.dossier-data .metric-label { font-size: 16px; line-height: 1.4; }
+.dossier-data .scenario-description { display: none; }
+.dossier-data .scenario-strip { display: block; }
+.dossier-data .scenario-strip button { width: 100%; }
+.dossier-data .dossier-markets { margin: 0; padding: 20px 0; border-bottom: 0; gap: 16px 24px; }
+.dossier-data .dossier-markets > h2 { font-size: 26px; margin-bottom: 6px; }
+.dossier-data .dossier-markets .section-heading h2 { font-size: 19px; }
+.dossier-data .dossier-markets .product-list li, .dossier-data .dossier-markets .market-list > div { font-size: 16px; padding: 12px 0; }
+.dossier-data .dossier-markets .national-context p, .dossier-data .dossier-markets .scope-note { font-size: 15px; }
+.dossier-data .product-list li { display: block; }
+.dossier-data .product-list .code { display: block; font-size: 12px; margin-bottom: 6px; }
+.area-overview-layout { display: grid; grid-template-columns: minmax(280px, .9fr) minmax(0,1.1fr); align-items: start; gap: 32px; }
+.area-overview-layout .area-locator { margin: 0; }
+.area-overview-layout .area-locator h2 { font-size: 22px; margin-bottom: 16px; }
+.area-overview-layout .area-markets { display: block; margin: 0; }
+.area-overview-layout .area-market { margin: 0 0 24px; }
+.area-locator .area-connected { cursor: pointer; }
+.area-locator .area-connected:hover, .area-locator .area-connected:focus-visible { fill: var(--accent); stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; outline: none; }
+.area-market .further-entry { font-size: 16px; padding: 12px; }
+.area-overview-layout .area-market-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
+.area-overview-layout .area-market-metrics + .area-market-metrics { grid-template-columns: 1fr; }
+.area-overview-layout .area-market-metrics strong { font-size: 24px; }
+.area-overview-layout .area-market-metrics span { font-size: 14px; line-height: 1.4; }
+.area-view .place-title h1 { font-size: clamp(32px,3.2vw,46px); }
+@media (max-width:1000px) {
+  .place-banner { grid-template-columns: minmax(170px,.65fr) minmax(0,1.7fr); gap: 20px; }
+  .place-banner .place-outlook { grid-template-columns: 1fr; }
+  .place-banner .place-outlook > .metric { grid-column: 1; grid-row: 2; padding-top: 0; }
+  .place-banner .support-intro { grid-column: 1; grid-row: 3; }
+  .place-banner .headline-metrics { grid-column: 1; grid-row: 4; padding-top: 0; }
+  .dossier-data { grid-template-columns: 1fr; }
+}
+@media (max-width:640px) {
+  .front-purpose { font-size: 22px; }
+  .front-jobs strong { font-size: 30px; }
+  .place-banner { padding: 22px 20px; grid-template-columns: 1fr; grid-template-areas: "name" "counts" "outlook"; }
+  .place-banner .place-title h1 { font-size: 34px; }
+  .place-banner .route-summary { display: flex; flex-direction: row; gap: 28px; }
+  .place-banner .route-summary strong { font-size: 26px; }
+  .place-banner .headline-metrics { grid-template-columns: 1fr; gap: 16px; }
+  .place-banner .place-outlook .metric-value, .place-banner .place-outlook .metric-primary .metric-value { font-size: 29px; }
+  .portfolio-controls > .segmented { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .portfolio-controls > .segmented button { border: 1px solid var(--control-border); }
+  .evidence-key-top > strong { font-size: 20px; }
+  .dossier-data .dossier-markets { display: block; }
+  .area-overview-layout { grid-template-columns: 1fr; }
+  .area-overview-layout .area-locator svg { max-height: 400px; }
+}
+
+/* Final copy and consistent exploration rows. */
+.front-intro { grid-template-columns: minmax(0,1fr) minmax(0,1.15fr); }
+.front-intro h1 { font-size: clamp(38px,3.3vw,54px); }
+.front-purpose { max-width: none; font-size: clamp(18px,1.4vw,22px); line-height: 1.5; letter-spacing: -.015em; }
+.front-purpose > span { font-size: clamp(18px,1.6vw,25px); white-space: nowrap; }
+.further-option > .opportunity-row .evidence-signal strong { font-size: 16px; }
+.further-option > .opportunity-row .evidence-signal small { font-size: 13px; margin-top: 0; color: inherit; }
+.further-option .further-open { align-self: center; font-size: 22px; }
+@media (max-width: 1100px) {
+  .further-option .further-open { grid-column: 2; grid-row: 1; }
+}
+@media (max-width: 1000px) {
+  .front-intro { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .front-purpose { font-size: 18px; }
+  .front-purpose > span { font-size: 21px; white-space: normal; }
+}
+
+/* Align the introduction with the map/search division below. */
+@media (min-width: 1001px) {
+  .front-intro { grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); column-gap: 0; padding-left: 0; padding-right: 0; }
+  .front-intro > div { padding: 0 var(--gutter); }
+  .front-purpose { padding: 0 40px; }
+}

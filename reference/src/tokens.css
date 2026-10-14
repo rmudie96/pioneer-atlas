@@ -8,10 +8,10 @@
   --line: #ced5d2;
   --boundary: #879d99;
   --control-border: #73837f;
-  --accent: #244bc4;
+  --accent: var(--data);
   --selected: var(--accent);
   --focus: var(--accent);
-  --hover: #e6ebf9;
+  --hover: #e5efeb;
   --data: #086c60;
   --positive: var(--data);
   --review: #a34728;

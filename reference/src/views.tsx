@@ -1,11 +1,11 @@
 import { useState } from "react";
+import { EstimateNote, FurtherIndustries } from "./FurtherIndustries";
 import type { MouseEvent, ReactNode } from "react";
 import {
   count,
   marketNames,
   money,
   range,
-  rating,
   reviewLabels,
   SCENARIOS,
   scenarioNames,
@@ -14,14 +14,24 @@ import {
 import type { Dataset, Option, Place, Route, Scenario } from "./model";
 import {
   Button,
-  EvidenceTrack,
-  RagBadge,
   Icon,
-  Metric,
-  ScenarioSelect,
   Search,
   SectionHeading,
 } from "./ui";
+
+import {
+  areaForPlace,
+  comparisonAreas,
+  industryName,
+  visibleOptions,
+  whyHere,
+} from "./exploration";
+import { IndustryLead, OpportunityFilters, PlaceOutlook } from "./ExploreViews";
+import {
+  EvidenceKey,
+  EvidenceHeadings,
+  EvidenceSignals,
+} from "./EvidenceSignals";
 
 export type Go = (update: Partial<Route>) => void;
 export function AtlasLink({
@@ -79,18 +89,20 @@ export function HomeView({
   go: Go;
   route: Route;
 }) {
-  const values = data.national.scenarios[route.scenario];
   return (
     <div className="home-view">
-      <span className="eyebrow">THE FUTURE ECONOMY, IN PLACE</span>
+      <span className="eyebrow">
+        ENGLAND / AN ATLAS OF INDUSTRIAL POSSIBILITY
+      </span>
       <h1 tabIndex={-1}>Where could England’s next industries grow?</h1>
       <p className="standfirst">
-        An atlas of industrial opportunities, the evidence behind them, and what
-        they could mean for local economies.
+        PIONEER is an atlas that maps industrial opportunities for every corner
+        of England, reconnecting every community with the world’s economy.
       </p>
       <Search
         places={data.places}
         onSelect={(code) => go({ place: code, industry: null })}
+        onArea={(area) => go({ area })}
       />
       <AtlasLink
         className="featured-link"
@@ -104,9 +116,46 @@ export function HomeView({
         </span>
         <Icon name="arrow" size={24} />
       </AtlasLink>
+      <button
+        className="industry-entry"
+        onClick={() =>
+          go({
+            view: "industries",
+            place: null,
+            industry: null,
+            sector: null,
+            filter: "all",
+            query: "",
+          })
+        }
+      >
+        <span>
+          <small>OR FOLLOW AN INDUSTRY</small>
+          <strong>What could we make next?</strong>
+        </span>
+        <Icon name="arrow" />
+      </button>
+      <details className="supporting-detail place-directory">
+        <summary>Browse all 149 local economies</summary>
+        <ul>
+          {[...data.places]
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((p) => (
+              <li key={p.code}>
+                <AtlasLink
+                  href={`?place=${p.code}&scenario=${route.scenario}`}
+                  onClick={() => go({ place: p.code, industry: null })}
+                >
+                  {p.name}
+                  <Icon name="arrow" size={14} />
+                </AtlasLink>
+              </li>
+            ))}
+        </ul>
+      </details>
       <div className="home-foot">
         <span>
-          <b>149</b> local labour markets
+          <b>149</b> local economies
         </span>
         <span>
           <b>89</b> retained industries
@@ -116,46 +165,58 @@ export function HomeView({
         Conditional research scenarios. Not forecasts or investment
         recommendations.
       </p>
-      <details className="supporting-detail national-account">
-        <summary>England’s scenario outlook</summary>
-        <ScenarioSelect
-          value={route.scenario}
-          onChange={(scenario) => go({ scenario })}
-        />
-        <Metric
-          primary
-          value={range(values.directFte, (n) => count(n, 100))}
-          label="Direct FTE supported across England"
-        />
-        <Metric
-          value={range(values.exports, money)}
-          label="Allocated additional export potential"
-        />
-        <Metric
-          value={range(values.supplyFte, (n) => count(n, 100))}
-          label="Associated UK-wide supply-chain FTE"
-        />
-        {values.totalFte && (
-          <Metric
-            value={range(values.totalFte, (n) => count(n, 100))}
-            label="Combined direct and UK supply-chain FTE"
-          />
-        )}
-        <p className="scope-note">
-          By {data.national.projectionHorizon}. Complete retained portfolio;
-          conditional gross effects, not net new jobs. Supply-chain effects are
-          UK-wide.
-        </p>
-      </details>
     </div>
   );
+}
+export function PlaceBanner({place, data, route, go}: {place: Place; data: Dataset; route: Route; go: Go; link: (u: Partial<Route>) => string}) {
+  return <section className="place-banner" aria-label={`${place.name} scenario outlook`}>
+      <div className="place-title">
+        <div>
+          <span className="eyebrow">
+            LOCAL ECONOMY / 2011 TRAVEL TO WORK AREA
+          </span>
+          <h1 tabIndex={-1}>{place.name}</h1>
+        </div>
+        <Button
+          className="button-outline"
+          onClick={() =>
+            go({
+              view: "compare",
+              place: null,
+              industry: null,
+              compare: [],
+              groups: [
+                ...comparisonAreas(data, route).filter(
+                  (a) => a.code !== place.code,
+                ),
+                areaForPlace(place),
+              ].slice(-3),
+              filter: "all",
+              query: "",
+              sector: null,
+            })
+          }
+        >
+          Compare this place <Icon name="plus" size={16} />
+        </Button>
+      </div>
+      <div className="route-summary">
+        <span>
+          <strong>{place.expansionOptions}</strong> expansion candidates
+        </span>
+        <span>
+          <strong>{place.diversificationOptions}</strong> candidates for
+          diversification
+        </span>
+      </div>
+      <PlaceOutlook place={place} route={route} go={go} />
+  </section>;
 }
 export function PlaceView({
   place,
   data,
   route,
   go,
-  method,
   link,
 }: {
   place: Place;
@@ -165,79 +226,24 @@ export function PlaceView({
   method: () => void;
   link: (update: Partial<Route>) => string;
 }) {
-  const [filter, setFilter] = useState("all");
+  const filter = route.filter ?? "all";
   const [all, setAll] = useState(false);
   const options = data.options
     .filter((o) => o.ttwaCode === place.code)
     .sort((a, b) => a.rank - b.rank);
-  const filtered = options.filter(
-    (o) => filter === "all" || o.route === filter,
-  );
-  const visible = all || filter !== "all" ? filtered : filtered.slice(0, 3);
-  const values = place.scenarios[route.scenario];
+  const filtered = visibleOptions(data, route);
+  const visible =
+    all || filter !== "all" || route.query ? filtered : filtered.slice(0, 6);
   return (
     <div className="place-view">
-      <span className="eyebrow">
-        TRAVEL TO WORK AREA <span className="code">/ {place.code}</span>
-      </span>
-      <h1 tabIndex={-1}>{place.name}</h1>
-      <p className="standfirst">
-        {place.candidateOptions} retained industrial candidates.{" "}
-        <span>
-          {place.expansionOptions} expansion opportunities and{" "}
-          {place.diversificationOptions} routes into new industries.
-        </span>
-      </p>
-      <ScenarioSelect
-        value={route.scenario}
-        onChange={(scenario) => go({ scenario })}
-      />
-      <Metric
-        primary
-        value={range(values.directFte, (n) => count(n, 10))}
-        label="Direct FTE supported in this local economy"
-      />
-      <Metric
-        value={range(values.exports, money)}
-        label="Allocated additional export potential"
-      />
-      <p className="scope-note">
-        Whole portfolio · {place.candidateOptions} candidates · by 2030.
-        <br />
-        Conditional gross effects, not net new jobs.{" "}
-        <button className="inline-link" onClick={method}>
-          What do the bounds mean?
-        </button>
-      </p>
+      <EvidenceKey />
+
       <>
-        <SectionHeading
-          number="01"
-          aside={
-            <label className="route-filter">
-              <span className="sr-only">
-                Filter displayed opportunities by route
-              </span>
-              <select
-                aria-label="Filter displayed opportunities by route"
-                value={filter}
-                onChange={(e) => {
-                  setFilter(e.target.value);
-                  setAll(true);
-                }}
-              >
-                <option value="all">All routes</option>
-                <option value="expansion">Expansion</option>
-                <option value="diversification">Diversification</option>
-              </select>
-            </label>
-          }
-        >
-          Industrial opportunities
-        </SectionHeading>
-        <p className="section-intro">
-          Ordered by lower policy-acceleration direct FTE. Rank and RAG ratings stay fixed when
-          the scenario changes.
-        </p>
+        <SectionHeading number="01">Industrial opportunities</SectionHeading>
+        <OpportunityFilters route={route} go={go} />
+        {route.filter === "exploration" ? <FurtherIndustries data={data} route={route} /> : <>
+
+        <EvidenceHeadings />
         <div className="opportunity-list">
           {visible.map((o) => (
             <AtlasLink
@@ -246,25 +252,16 @@ export function PlaceView({
               onClick={() => go({ industry: o.sic4, section: "why" })}
               className="opportunity-row"
             >
-              <span className="rank">{String(o.rank).padStart(2, "0")}</span>
               <span className="opportunity-body">
-                <strong>{o.industry}</strong>
+                <strong>{industryName(o.industry)}</strong>
+                <span className="opportunity-why">{whyHere(o)}</span>
                 <span className="opportunity-meta">
                   {o.route} <span aria-hidden="true">·</span>{" "}
                   {range(o.scenarios[route.scenario].directFte, (n) =>
                     count(n, 5),
                   )}{" "}
-                  direct FTE
-                </span>
-                <span className="opportunity-ratings">
-                  <RagBadge value={o.jobsRating} label="Jobs scale" />
-                  <RagBadge
-                    value={o.ratings.comparativeAdvantage}
-                    label="Current base"
-                  />
-                  <RagBadge value={o.ratings.relatedness} label="Relatedness" />
-                  <RagBadge value={o.ratings.workforce} label="Workforce" />
-                  <RagBadge value={o.ratings.export} label="Exports" />
+                  gross direct FTE <span aria-hidden="true">·</span>{" "}
+                  {range(o.scenarios[route.scenario].exports, money)} exports
                 </span>
                 {o.reviewRequired && (
                   <span className="review-tag">
@@ -272,118 +269,29 @@ export function PlaceView({
                   </span>
                 )}
               </span>
+              <EvidenceSignals option={o} />
               <Icon name="arrow" />
             </AtlasLink>
           ))}
         </div>
         {!visible.length && (
           <p className="empty-result" role="status">
-            No {filter} propositions in the {options.length} published rows.
-            This does not mean there are none in the full{" "}
-            {place.candidateOptions}
-            -candidate portfolio.
+            {filter === "diversification" && !route.query
+              ? "No industries meet the quantified model’s diversification rules here. Select Further industries to explore above for additional, unquantified options."
+              : "No modelled opportunities in this view match your filters. Try another industry name or route."}
           </p>
         )}
-        {filter === "all" && options.length > 3 && (
+        {filter === "all" && options.length > 6 && (
           <Button className="show-more" onClick={() => setAll((v) => !v)}>
             {all
-              ? "Show leading three"
-              : `Explore all ${options.length} published propositions`}{" "}
+              ? "Show leading six"
+              : "Explore more"}{" "}
             <Icon name={all ? "minus" : "plus"} />
           </Button>
         )}
-        <p className="small-note">
-          {filter === "all"
-            ? `${visible.length} shown`
-            : `${filtered.length} matching displayed rows`}{" "}
-          · {options.length} published propositions available ·{" "}
-          {place.candidateOptions} in the complete portfolio. Headlines include
-          the full portfolio.
-        </p>
+        </>}
+        <EstimateNote />
       </>
-      <details className="supporting-detail">
-        <summary>Compare the published evidence</summary>
-        <p className="small-note">
-          Separate stored ratings; these stay fixed when the scenario changes.
-          Showing the current route filter.
-        </p>
-        <p className="small-note">
-          Jobs-scale RAG uses lower policy-acceleration direct FTE: green ≥100,
-          amber 25–under 100, red under 25. The four evidence ratings measure
-          separate strengths; this is not an overall confidence score.
-        </p>
-        <div
-          className="evidence-table-scroll"
-          tabIndex={0}
-          role="region"
-          aria-label="Published evidence table; scroll horizontally on small screens"
-        >
-          <table className="portfolio-table">
-            <caption>{place.name} · published propositions</caption>
-            <thead>
-              <tr>
-                <th scope="col">Industry</th>
-                <th scope="col">Direct FTE</th>
-                <th scope="col">Current base</th>
-                <th scope="col">Relatedness</th>
-                <th scope="col">Workforce</th>
-                <th scope="col">Exports</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((o) => (
-                <tr key={o.sic4}>
-                  <th scope="row">
-                    <AtlasLink
-                      href={link({ industry: o.sic4, section: "why" })}
-                      onClick={() => go({ industry: o.sic4, section: "why" })}
-                    >
-                      {o.rank}. {o.industry}
-                    </AtlasLink>
-                  </th>
-                  <td>
-                    {range(o.scenarios[route.scenario].directFte, (n) =>
-                      count(n, 5),
-                    )}
-                    <RagBadge value={o.jobsRating} label="Jobs scale" />
-                  </td>
-                  {[
-                    o.ratings.comparativeAdvantage,
-                    o.ratings.relatedness,
-                    o.ratings.workforce,
-                    o.ratings.export,
-                  ].map((r, i) => (
-                    <td key={i}>
-                      <RagBadge value={r} />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </details>
-      <details className="supporting-detail">
-        <summary>UK supply-chain effects and portfolio context</summary>
-        <Metric
-          value={range(values.supplyFte, (n) => count(n, 10))}
-          label="Associated UK-wide supply-chain FTE"
-        />
-        <p>
-          These effects are not jobs located in {place.name}. No employment has
-          been assigned to neighbourhood residents.
-        </p>
-        <p>
-          {place.jobsRatings.green} candidates have at least 100 direct FTE
-          under the lower policy-acceleration scenario. This is a scale band,
-          not an overall confidence rating.
-        </p>
-        <p>
-          {place.jobsRatings.amber} candidates are in the 25–under 100 FTE band;{" "}
-          {place.jobsRatings.red} are below 25 FTE. All three bands use lower
-          policy-acceleration direct FTE.
-        </p>
-      </details>
     </div>
   );
 }
@@ -441,233 +349,23 @@ export function ScenarioChart({
     </div>
   );
 }
-export function IndustryView({
-  option,
-  placeName,
-  route,
-  go,
-  link,
-  method,
-}: {
-  option: Option;
-  placeName: string;
-  route: Route;
-  go: Go;
-  link: (u: Partial<Route>) => string;
-  method: () => void;
+export function IndustryView({option, placeName, route, go, method}: {
+  option: Option; placeName: string; route: Route; go: Go;
+  link: (u: Partial<Route>) => string; method: () => void;
 }) {
-  const values = option.scenarios[route.scenario];
-  const tabs = [
-    ["why", "Why here"],
-    ["scenarios", "Scenarios"],
-    ["markets", "Products & markets"],
-  ] as const;
-  return (
-    <div className="industry-view">
-      <span className="eyebrow">
-        {placeName.toUpperCase()} / INDUSTRY EVIDENCE
-      </span>
-      <h1 tabIndex={-1}>{option.industry}</h1>
-      <div className="dossier-meta">
-        <span className="route-label">{option.route}</span>
-        <span className="code">SIC {option.sic4}</span>
-        <span>Rank {option.rank}</span>
-      </div>
-      <p className="small-note">
-        Ranked by lower policy-acceleration direct FTE, not an overall
-        opportunity score.
-      </p>
-      {option.reviewRequired && (
-        <p className="dossier-review-summary">
-          <Icon name="info" size={16} />
-          {option.reviewReasons.includes(
-            "precious_materials_trade_value_review",
-          )
-            ? "Precious-materials trade values require interpretation."
-            : "This proposition has an interpretation condition."}
-        </p>
-      )}
-      <nav className="local-tabs" aria-label="Industry evidence sections">
-        {tabs.map(([section, title]) => (
-          <AtlasLink
-            key={section}
-            href={link({ section })}
-            onClick={() => go({ section })}
-            className={route.section === section ? "current" : ""}
-            current={route.section === section}
-          >
-            {title}
-          </AtlasLink>
-        ))}
-      </nav>
-      {route.section === "why" && (
-        <>
-          <SectionHeading number="01">
-            The existing industrial base
-          </SectionHeading>
-          <div className="base-evidence">
-            <Metric
-              value={count(option.currentJobs, 5)}
-              label="Recorded current jobs"
-            />
-            <Metric
-              value={option.employmentRca.toFixed(2)}
-              label="Employment RCA"
-            />
-          </div>
-          <p>
-            {option.employmentRca >= 1 && option.currentJobs > 0
-              ? "The industry has an existing local employment base and accounts for at least as large a share of employment here as nationally."
-              : option.currentJobs === 0
-                ? "There is no recorded local employment in this industry. The opportunity must be read alongside the separate relatedness and workforce evidence."
-                : "The industry has recorded local employment, but its share of employment is below the national share."}
-          </p>
-          <p className="small-note">
-            <RagBadge
-              label="Current-base evidence"
-              value={option.ratings.comparativeAdvantage}
-            />
-            . The employment RCA compares the local industry share with the
-            national share.
-          </p>
-          <SectionHeading number="02">The evidence of fit</SectionHeading>
-          <div className="evidence-pair">
-            <EvidenceTrack
-              label="Industrial relatedness"
-              value={option.relatedness}
-              status={option.ratings.relatedness}
-            />
-            <EvidenceTrack
-              label="Workforce fit"
-              value={option.workforce}
-              status={option.ratings.workforce}
-            />
-          </div>
-          <p className="small-note">
-            Percentiles compare TTWAs for this same industry. Workforce fit
-            describes the occupational mix, not workers available for
-            recruitment.
-          </p>
-          <div className="export-evidence">
-            <span>National export opportunity evidence</span>
-            <RagBadge value={option.ratings.export} />
-          </div>
-          <SectionHeading number="03">
-            What the scenario could support
-          </SectionHeading>
-          <ScenarioSelect
-            value={route.scenario}
-            onChange={(scenario) => go({ scenario })}
-          />
-          <Metric
-            primary
-            value={range(values.directFte, (n) => count(n, 5))}
-            label={`Direct FTE supported in ${placeName}`}
-          />
-          <div className="impact-secondary">
-            <Metric
-              value={range(values.exports, money)}
-              label="Allocated export potential"
-            />
-            <Metric
-              value={range(values.supplyFte, (n) => count(n, 5))}
-              label="UK-wide supply-chain FTE"
-            />
-          </div>
-          <p className="scope-note">
-            Conditional gross effects, not net new jobs. Supply-chain effects
-            are not local employment.{" "}
-            <button className="inline-link" onClick={method}>
-              Read the assumptions
-            </button>
-          </p>
-          <ReviewNote option={option} />
-          <AtlasLink
-            href={link({ section: "markets" })}
-            onClick={() => go({ section: "markets" })}
-            className="next-section"
-          >
-            <span>
-              <span className="eyebrow">CONTINUE THE EVIDENCE</span>
-              <strong>Products and overseas markets</strong>
-            </span>
-            <Icon name="arrow" />
-          </AtlasLink>
-          <details className="supporting-detail">
-            <summary>Underlying measures and source context</summary>
-            <table>
-              <caption>
-                Existing stored evidence · {placeName} / SIC {option.sic4}
-              </caption>
-              <tbody>
-                {[
-                  ["Current jobs", option.currentJobs],
-                  ["Local units", option.localUnits],
-                  ["Employment RCA", option.employmentRca],
-                  ["Relatedness percentile", option.relatedness],
-                  ["Workforce percentile", option.workforce],
-                  [
-                    "Jobs-scale band (fixed policy acceleration)",
-                    rating(option.jobsRating),
-                  ],
-                  [
-                    "National transformational opportunity (£m)",
-                    option.nationalOpportunity,
-                  ],
-                  [
-                    "Policy-acceleration allocation share (%)",
-                    option.allocationShare,
-                  ],
-                ].map(([key, value]) => (
-                  <tr key={key}>
-                    <th scope="row">{key}</th>
-                    <td>{value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <p className="small-note">
-              Source: existing final place layer, research release f77e59d.
-              These are stored web-data values; no additional precision or
-              recalculation is implied.
-            </p>
-          </details>
-        </>
-      )}
-      {route.section === "scenarios" && (
-        <>
-          <SectionHeading number="01">Three conditional futures</SectionHeading>
-          <ScenarioSelect
-            value={route.scenario}
-            onChange={(scenario) => go({ scenario })}
-          />
-          <ScenarioChart
-            option={option}
-            scenario={route.scenario}
-            placeName={placeName}
-          />
-          <div className="impact-secondary">
-            <Metric
-              value={range(values.exports, money)}
-              label={`${scenarioNames[route.scenario]} · allocated exports`}
-            />
-            <Metric
-              value={range(values.supplyFte, (n) => count(n, 5))}
-              label="Associated UK-wide supply-chain FTE"
-            />
-          </div>
-          <ReviewNote option={option} />
-          <p className="scope-note">
-            Gross conditional FTE supported, not net new jobs. The stored rank
-            and evidence ratings remain fixed across these scenarios.
-          </p>
-          <Button className="button-outline" onClick={method}>
-            How the scenarios are constructed <Icon name="info" />
-          </Button>
-        </>
-      )}
-      {route.section === "markets" && (
-        <>
+  return <div className="industry-view">
+    <header className="dossier-introduction">
+      <span className="eyebrow">{placeName.toUpperCase()} / INDUSTRY EVIDENCE</span>
+      <h1 tabIndex={-1}>{industryName(option.industry)}</h1>
+      <p className="industry-definition">{whyHere(option)}</p>
+      <p className="small-note">Official classification: {option.industry} · SIC {option.sic4}</p>
+    </header>
+    <EvidenceKey />
+    <EvidenceSignals option={option} headings />
+    <div className="dossier-data">
+      <IndustryLead option={option} placeName={placeName} route={route} go={go} />
+      <section className="dossier-markets" id="industry-markets" aria-label="Main products and overseas markets">
+          <h2>Main products and overseas markets</h2>
           <div className="national-context">
             <span className="eyebrow">
               NATIONAL EVIDENCE / NOT LOCAL PRODUCTION
@@ -720,8 +418,7 @@ export function IndustryView({
             Product-to-industry evidence and limitations{" "}
             <Icon name="arrow" size={16} />
           </button>
-        </>
-      )}
+      </section>
     </div>
-  );
+  </div>;
 }

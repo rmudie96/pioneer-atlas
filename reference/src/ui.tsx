@@ -1,7 +1,11 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef } from "react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { count, ordinal, rating, scenarioNames, SCENARIOS } from "./model";
-import type { Place, Scenario } from "./model";
+import { ordinal, rating, scenarioNames, SCENARIOS } from "./model";
+import type { AreaSelection, Place, Scenario } from "./model";
+import { Search } from "./GeoSearch";
+export { Search } from "./GeoSearch";
+import { scenarioDescriptions } from "./exploration";
+import { horizonNote } from "./realisation";
 
 export function Icon({
   name,
@@ -123,36 +127,43 @@ export function ScenarioSelect({
   value: Scenario;
   onChange: (s: Scenario) => void;
 }) {
+  const id = useId();
+  const picker = useRef<HTMLDetailsElement>(null);
   return (
     <div className="scenario-field">
-      <label htmlFor="scenario">Export scenario</label>
-      <select
-        id="scenario"
-        value={value}
-        onChange={(e) => onChange(e.target.value as Scenario)}
-      >
-        {SCENARIOS.map((s) => (
-          <option key={s} value={s}>
-            {scenarioNames[s]}
-          </option>
-        ))}
-      </select>
+      <span id={id}>Export scenario</span>
+      <details ref={picker} className="scenario-picker" onKeyDown={e => {
+        if (e.key === "Escape" && picker.current) {
+          picker.current.open = false;
+          picker.current.querySelector("summary")?.focus();
+        }
+      }}>
+        <summary>{scenarioNames[value]}</summary>
+        <div role="radiogroup" aria-labelledby={id}>
+          {SCENARIOS.map(s => <label key={s}><input type="radio" name={id} checked={s === value} onChange={() => {
+            onChange(s);
+            if (picker.current) { picker.current.open = false; picker.current.querySelector("summary")?.focus(); }
+          }} />{scenarioNames[s]}</label>)}
+        </div>
+      </details>
       <span className="scenario-year">by 2030</span>
+      <p className="scenario-description">{scenarioDescriptions[value]}</p>
     </div>
   );
 }
-export function RagBadge({ value, label }: { value: string; label?: string }) {
+export function RagBadge({ value, label, nationalExport = false }: { value: string; label?: string; nationalExport?: boolean }) {
+  const description = nationalExport ? rating(value).replace("Stronger", "Strong").replace("Weaker", "Weak") : rating(value);
   const colour = value.split("_")[0];
   const tone = ["green", "amber", "red"].includes(colour) ? colour : "grey";
   return (
     <span
       className={`rag-badge rag-${tone}`}
-      title={`${label ? `${label}: ` : ""}${rating(value)} (${tone})`}
+      title={`${label ? `${label}: ` : ""}${description} (${tone})`}
     >
       <i aria-hidden="true" />
       <span>
         {label && `${label}: `}
-        {rating(value)}
+        {description}
       </span>
     </span>
   );
@@ -188,116 +199,6 @@ export function EvidenceTrack({
     </div>
   );
 }
-export function Search({
-  places,
-  onSelect,
-}: {
-  places: Place[];
-  onSelect: (code: string) => void;
-}) {
-  const id = useId();
-  const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(-1);
-  const ref = useRef<HTMLDivElement>(null);
-  const matches = places
-    .filter((p) => p.name.toLowerCase().includes(query.trim().toLowerCase()))
-    .slice(0, 8);
-  function choose(p: Place) {
-    onSelect(p.code);
-    setQuery("");
-    setOpen(false);
-    setActive(-1);
-  }
-  useEffect(() => {
-    function outside(e: PointerEvent) {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("pointerdown", outside);
-    return () => document.removeEventListener("pointerdown", outside);
-  }, []);
-  return (
-    <div className="search" ref={ref}>
-      <label htmlFor={`${id}-search`}>Find a local economy</label>
-      <div className="search-input">
-        <Icon name="search" />
-        <input
-          id={`${id}-search`}
-          type="search"
-          role="combobox"
-          aria-autocomplete="list"
-          aria-expanded={open}
-          aria-controls={`${id}-results`}
-          aria-activedescendant={
-            open && active >= 0 ? `${id}-result-${active}` : undefined
-          }
-          autoComplete="off"
-          placeholder="Search for a place…"
-          value={query}
-          onFocus={() => {
-            if (query) setOpen(true);
-          }}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setOpen(!!e.target.value.trim());
-            setActive(-1);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              setOpen(false);
-              setActive(-1);
-            }
-            if (e.key === "ArrowDown") {
-              e.preventDefault();
-              setOpen(true);
-              setActive((i) => Math.min(i + 1, matches.length - 1));
-            }
-            if (e.key === "ArrowUp") {
-              e.preventDefault();
-              setActive((i) => Math.max(i - 1, 0));
-            }
-            if (e.key === "Enter" && open && matches.length) {
-              e.preventDefault();
-              choose(matches[Math.max(active, 0)]);
-            }
-          }}
-        />
-      </div>
-      {open && (
-        <div className="search-results">
-          <div
-            id={`${id}-results`}
-            role="listbox"
-            aria-label="Matching local economies"
-          >
-            {matches.map((p, i) => (
-              <div
-                id={`${id}-result-${i}`}
-                role="option"
-                aria-selected={active === i}
-                key={p.code}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => choose(p)}
-                className={i === active ? "active" : ""}
-              >
-                <span>{p.name}</span>
-                <span className="result-count">
-                  {count(p.candidateOptions)} candidates{" "}
-                  <Icon name="arrow" size={16} />
-                </span>
-              </div>
-            ))}
-          </div>
-          {!matches.length && (
-            <p role="status">
-              No matching TTWA name. Try “Sheffield” or another local economy.
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
 export function MethodDialog({
   open,
   onClose,
@@ -329,7 +230,7 @@ export function MethodDialog({
       <h2 id="method-title">How to read PIONEER</h2>
       <p>
         PIONEER identifies conditional industrial opportunities in England’s
-        local labour markets. These are research scenarios, not forecasts or
+        local economies. These are research scenarios, not forecasts or
         investment recommendations.
       </p>
       <h3>What the numbers mean</h3>
@@ -341,11 +242,14 @@ export function MethodDialog({
       </p>
       <h3>Three scenarios, two bounds</h3>
       <p>
-        Existing trajectory uses reference export growth. Policy acceleration
-        adds half the remaining ITC gap. Transformational uses the full
-        unrealised opportunity. Where both routes exist,
-        expansion/diversification shares are 80/20, 65/35 and 50/50
-        respectively.
+        The scenarios represent achieving one-third, two-thirds or all of the
+        unrealised export potential covered by the model. Every place and industry
+        keeps its original full-potential allocation; the smaller scenarios are
+        exactly one-third and two-thirds of those export and employment figures.
+        The full-potential allocation is split equally between expansion and
+        diversification where both routes exist. Existing single-route exceptions
+        are retained. The England figures cover the 89 industries (SIC) retained for this model,
+        not every product in the ITC dataset.
       </p>
       <p>
         The lower envelope uses the existing England employment-share benchmark;
@@ -353,10 +257,11 @@ export function MethodDialog({
         contestable. Bounds are not confidence intervals. Conversion retains the
         fixed US$1 = £0.74 model assumption.
       </p>
-      <h3>Rank is not confidence</h3>
+      <h3>Order and evidence</h3>
       <p>
-        Canonical rank is lower policy-acceleration direct FTE. It does not
-        change with the selected scenario. Relatedness and workforce percentiles
+        Industries are ordered by employment or export opportunity in the selected
+        scenario, using the lower estimate. Original research ranks remain in
+        downloaded data for traceability; they are not confidence ratings. Relatedness and workforce percentiles
         compare places for the same industry. The four evidence ratings remain
         separate.
       </p>
@@ -365,8 +270,11 @@ export function MethodDialog({
         The map retains the original 149 TTWA boundaries (2011). National need
         is the percentile of the share of residents in the most deprived 20% of
         English neighbourhoods, not an official TTWA IMD decile. Place totals
-        cover each complete candidate portfolio; lists expose up to 20 published
-        leading propositions per place. Neighbourhood detail uses the existing
+        cover each complete candidate portfolio. Lists show the original leading
+        expansion propositions and all existing modelled diversification candidates.
+        Ten further industries per place are presented separately for exploration:
+        they have no local export or employment estimates and add nothing to totals.
+        Neighbourhood detail uses the existing
         2021 LSOAs and IoD 2025 deciles, not an allocation of jobs to residents.
       </p>
       <h3>Products and markets</h3>
@@ -378,9 +286,11 @@ export function MethodDialog({
       <p className="source-note">
         Sources: existing PIONEER final place layer; ITC export potential; ONS
         employment, geography and 2023 input-output employment effects; IoD
-        2025. Research release f77e59d. The original model and all thresholds
-        are unchanged.
+        2025. Research release f77e59d. Original full-potential allocations and
+        analytical thresholds are retained; smaller scenarios now use fixed
+        realisation shares.
       </p>
+      <p>{horizonNote}</p>
       <Button className="button-primary" onClick={onClose}>
         Return to the atlas <Icon name="arrow" />
       </Button>
@@ -392,10 +302,12 @@ export function PlaceSearchDialog({
   places,
   onClose,
   onSelect,
+  onArea,
 }: {
   places: Place[];
   onClose: () => void;
   onSelect: (code: string) => void;
+  onArea: (area: AreaSelection) => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -415,8 +327,11 @@ export function PlaceSearchDialog({
           <Icon name="close" />
         </Button>
       </div>
-      <Search places={places} onSelect={onSelect} />
-      <p className="small-note">Search the 149 English Travel to Work Areas.</p>
+      <Search places={places} onSelect={onSelect} onArea={onArea} />
+      <p className="small-note">
+        Search by postcode, settlement, constituency, council or local-economy
+        name.
+      </p>
     </dialog>
   );
 }

@@ -6,7 +6,9 @@ import "@fontsource/ibm-plex-sans/latin-600.css";
 import "@fontsource/ibm-plex-mono/latin-400.css";
 import "./tokens.css";
 import "./styles.css";
+import "./exploration.css";
 import { App } from "./App";
+import "./readability.css";
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

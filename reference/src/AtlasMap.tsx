@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
-import { count, needClass, ordinal, quantiles, SHEFFIELD } from "./model";
+import { needClass, ordinal, quantiles, SHEFFIELD, LOCAL_NEED_LABEL } from "./model";
 import type { Dataset, Route } from "./model";
+import { industryName } from "./exploration";
 import { Button, Icon } from "./ui";
 
 type Box = [number, number, number, number];
@@ -29,10 +30,24 @@ export function AtlasMap({
   onSelect: (code: string) => void;
   onLens: (lens: Route["lens"]) => void;
   reading: boolean;
+  scenario: Route["scenario"];
 }) {
+  const [needShares, setNeedShares] = useState<Record<string, number>>({});
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("./context/neighbourhood-need.json", { signal: controller.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
+      .then(setNeedShares)
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
   const [view, setView] = useState<Box>(ENGLAND);
   const viewRef = useRef<Box>(view);
   viewRef.current = view;
+  const [keyboardCode, setKeyboardCode] = useState(selected ?? SHEFFIELD);
   const [hovered, setHovered] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const svg = useRef<SVGSVGElement>(null);
@@ -118,7 +133,7 @@ export function AtlasMap({
           <span className="eyebrow">
             {selected
               ? "LOCAL ECONOMY / 2011 TTWA"
-              : "ENGLAND / 149 LOCAL LABOUR MARKETS"}
+              : "ENGLAND / 149 LOCAL ECONOMIES"}
           </span>
           <h2>
             {selected
@@ -126,27 +141,30 @@ export function AtlasMap({
               : "A geography of possibility"}
           </h2>
         </div>
-        <label className="lens-control">
-          <span className="sr-only">Map layer</span>
-          <select
-            aria-label="Map layer"
-            value={lens}
-            onChange={(e) => onLens(e.target.value as typeof lens)}
-          >
-            <option value="opportunities">Opportunities</option>
-            <option value="need">Neighbourhood need</option>
-            {selected && (
-              <option value="neighbourhoods">Local IMD deciles</option>
-            )}
-          </select>
-        </label>
+        {selected ? <div
+          className="segmented map-layers"
+          role="group"
+          aria-label="Map layer"
+        >
+          <button aria-pressed={lens === "need"} onClick={() => onLens("need")}>
+            {LOCAL_NEED_LABEL}
+          </button>
+          {selected && (
+            <button
+              aria-pressed={lens === "neighbourhoods"}
+              onClick={() => onLens("neighbourhoods")}
+            >
+              Neighbourhoods
+            </button>
+          )}
+        </div> : <span className="map-layer-title">{LOCAL_NEED_LABEL}</span>}
       </div>
       <div className={`map-stage ${dragging ? "dragging" : ""}`}>
         <svg
           ref={svg}
           className="geography"
           viewBox={view.join(" ")}
-          aria-label="Travel to Work Areas in England. Select an area or use place search."
+          aria-label="Travel to Work Areas in England. Use arrow keys to move between areas, Enter to select, or use place search."
           role="group"
           onPointerDown={(e) => {
             if (e.button !== 0) return;
@@ -194,10 +212,11 @@ export function AtlasMap({
             <path
               key={b.code}
               d={b.path}
-              className={`ttwa ${b.code === selected ? "is-selected" : ""} ${hovered === b.code ? "is-hovered" : ""} ${lens === "need" ? `need-${needClass(byCode.get(b.code)!.localDeprivationPercentile, breaks)}` : ""}`}
+              className={`ttwa ${b.code === selected ? "is-selected" : ""} ${hovered === b.code ? "is-hovered" : ""} need-${needClass(byCode.get(b.code)!.localDeprivationPercentile, breaks)}`}
               role="button"
-              tabIndex={0}
-              aria-label={`${b.name}, ${byCode.get(b.code)!.candidateOptions} candidate industries`}
+              data-code={b.code}
+              tabIndex={keyboardCode === b.code ? 0 : -1}
+              aria-label={`${b.name}. ${ordinal(byCode.get(b.code)!.localDeprivationPercentile)} percentile for ${LOCAL_NEED_LABEL.toLowerCase()}. Select to explore.`}
               aria-pressed={selected === b.code}
               onPointerEnter={() => {
                 if (!drag.current?.moved) setHovered(b.code);
@@ -205,13 +224,37 @@ export function AtlasMap({
               onPointerMove={() => {
                 if (!drag.current) setHovered(b.code);
               }}
-              onFocus={() => setHovered(b.code)}
+              onFocus={() => {
+                setHovered(b.code);
+                setKeyboardCode(b.code);
+              }}
               onBlur={() => setHovered(null)}
               onClick={() => {
                 if (!drag.current?.moved) onSelect(b.code);
                 drag.current = null;
               }}
               onKeyDown={(e) => {
+                if (
+                  ["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(
+                    e.key,
+                  )
+                ) {
+                  e.preventDefault();
+                  const index = data.boundaries.findIndex(
+                    (x) => x.code === b.code,
+                  );
+                  const delta =
+                    e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : -1;
+                  const next =
+                    data.boundaries[
+                      (index + delta + data.boundaries.length) %
+                        data.boundaries.length
+                    ].code;
+                  svg.current
+                    ?.querySelector<SVGPathElement>(`[data-code="${next}"]`)
+                    ?.focus();
+                }
+
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   onSelect(b.code);
@@ -294,10 +337,24 @@ export function AtlasMap({
             <span className="eyebrow">TRAVEL TO WORK AREA</span>
             <strong>{preview.name}</strong>
             <span>
-              {lens === "need"
-                ? `${ordinal(preview.localDeprivationPercentile)} percentile · neighbourhood need`
-                : `${count(preview.candidateOptions)} retained industrial candidates`}
+              {`${needShares[preview.code] !== undefined ? `${needShares[preview.code].toFixed(1)}% of residents in the most deprived 20% of neighbourhoods` : "Population share unavailable"} · ${ordinal(preview.localDeprivationPercentile)} percentile`}
             </span>
+            <ul>
+              {data.options
+                .filter((o) => o.ttwaCode === preview.code)
+                .sort((a, b) => a.rank - b.rank)
+                .slice(0, 3)
+                .map((o) => (
+                  <li key={o.sic4}>
+                    {industryName(o.industry)}
+                    {o.reviewRequired ? " †" : ""}
+                  </li>
+                ))}
+            </ul>
+            <small>
+              Leading published opportunities · research order. † Interpretation
+              note.
+            </small>
           </div>
         )}
         {selected && (
@@ -318,8 +375,6 @@ export function AtlasMap({
         )}
       </div>
       <div className="map-bottom">
-        {lens === "need" ? (
-          <>
             <div className="legend">
               <span>Lower need</span>
               <span className="legend-swatches">
@@ -330,23 +385,18 @@ export function AtlasMap({
               <span>Higher need</span>
             </div>
             <details>
-              <summary>Percentile class boundaries</summary>
+              <summary>What does {LOCAL_NEED_LABEL.toLowerCase()} mean?</summary>
               <p>
-                {breaks.map((x) => x.toFixed(1)).join(" / ")}. Existing quantile
-                classification. Need ranks the share of residents in England’s
-                most deprived 20% of neighbourhoods.
+                Colours rank the share of residents living in England’s most
+                deprived 20% of neighbourhoods (IMD 2025). These are five
+                relative groups of local economies, not official TTWA IMD
+                deciles. Percentile boundaries:{" "}
+                {breaks.map((x) => x.toFixed(1)).join(" / ")}. Hover or focus
+                for the underlying percentage. Population uses the existing
+                mid-2022 estimates, with cross-boundary neighbourhoods
+                apportioned by output areas.
               </p>
             </details>
-          </>
-        ) : (
-          <p>
-            <i className="map-key" /> Select a local economy to explore its
-            opportunities.
-          </p>
-        )}
-        <span className="map-source">
-          ONS TTWA 2011 · Existing PIONEER geography
-        </span>
       </div>
     </section>
   );
