@@ -1,4 +1,4 @@
-.atlas-front { max-width: 1680px; margin: 0 auto; }
+.atlas-front { width: 100%; max-width: none; margin: 0; }
 .front-jump { display: none; }
 .front-intro { padding: 30px var(--gutter) 28px; display: grid; grid-template-columns: minmax(0, 2.4fr) minmax(220px, 1fr); gap: 40px; align-items: end; border-bottom: 1px solid var(--line); }
 .front-intro h1 { font-size: clamp(44px, 4.8vw, 78px); line-height: 1.04; font-weight: 400; letter-spacing: -.05em; margin: 0 0 14px; text-wrap: initial; }

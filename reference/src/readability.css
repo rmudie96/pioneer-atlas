@@ -263,6 +263,11 @@
 }
 
 /* Align the introduction with the map/search division below. */
+.site-header .brand > strong { font-size: 36px; }
+.brand-descriptor { font-size: 13px; line-height: 1.4; letter-spacing: .025em; }
+@media (max-width: 767px) {
+  .site-header .brand > strong { font-size: 29px; }
+}
 .front-model-name { color: var(--data); font-size: 20px; font-weight: 500; line-height: 1.45; margin: 18px 0 24px; }
 @media (max-width: 640px) {
   .front-model-name { font-size: 18px; margin: 16px 0 24px; }
