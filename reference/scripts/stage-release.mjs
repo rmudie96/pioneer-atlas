@@ -30,7 +30,7 @@ await cp(new URL("context/", dist), new URL("context/", root), {
   recursive: true,
 });
 await copyFile(new URL("index.html", dist), new URL("index.html", root));
-await copyFile(new URL("pioneer-share.png", dist), new URL("pioneer-share.png", root));
+await copyFile(new URL("pioneer-share-square.png", dist), new URL("pioneer-share-square.png", root));
 await copyFile(
   new URL("THIRD_PARTY_NOTICES.txt", dist),
   new URL("THIRD_PARTY_NOTICES.txt", root),
