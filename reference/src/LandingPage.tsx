@@ -21,6 +21,7 @@ export function LandingPage({ data, route, go, link, method, reading, download }
       <header className="front-intro">
         <div>
           <h1 tabIndex={-1}><span>PIONEER:</span> A new economic<br className="front-title-break" /> atlas for England</h1>
+          <p className="front-model-name">Place-based Industrial Opportunities for<br className="front-model-break" /> Neighbourhood Employment and Economic Renewal</p>
           <p className="front-credit">Created by the <strong>Independent Commission on Neighbourhoods</strong></p>
         </div>
         <p className="front-purpose"><span>A map of industrial opportunity for England.</span> The PIONEER Atlas is a place-based, sector and product-level scenario model which links the International Trade Centre (ITC)’s assessments of the UK’s unrealised export potential in goods, to local economies in every corner of the nation.</p>
